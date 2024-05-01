@@ -10,6 +10,18 @@ CREATE TABLE IF NOT EXISTS users (
     type TEXT NOT NULL DEFAULT 'user'
 );
 
+DROP TABLE IF EXISTS files;
+CREATE TABLE IF NOT EXISTS files(
+    id INTEGER PRIMARY KEY NOT NULL,
+    filename TEXT NOT NULL,
+    filetype TEXT NOT NULL CHECK (filetype IN ('movie', 'song', 'episode', 'picture')),
+    filesize INTEGER NOT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expired TIMESTAMP,
+    description TEXT,
+    owner INTEGER NOT NULL,
+    FOREIGN KEY (owner) REFERENCES users(id)
+);
 
 DROP TABLE IF EXISTS credits;
 CREATE TABLE IF NOT EXISTS credits (
@@ -30,18 +42,4 @@ CREATE TABLE IF NOT EXISTS files_share (
     shared_with TEXT NOT NULL,
     file_id TEXT NOT NULL UNIQUE
 );
-
-
-DROP TABLE IF EXISTS files;
-CREATE TABLE IF NOT EXISTS files (
-    id INTEGER PRIMARY KEY NOT NULL,
-    file_name TEXT NOT NULL,
-    file_type TEXT NOT NULL,
-    file_size TEXT NOT NULL,
-    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
-    expire TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
-    description TEXT NOT NULL,
-    owner TEXT NOT NULL UNIQUE
-);
-
 
