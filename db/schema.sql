@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS credits (
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
     user_id TEXT NOT NULL UNIQUE,
     credits TEXT NOT NULL,
-    Reason / action  TEXT NOT NULL
+    Reason_action  TEXT NOT NULL
 );
 
 
@@ -28,8 +28,7 @@ CREATE TABLE IF NOT EXISTS files_share (
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
     shared_by TEXT NOT NULL UNIQUE,
     shared_with TEXT NOT NULL,
-    file_id TEXT NOT NULL UNIQUE,
-    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+    file_id TEXT NOT NULL UNIQUE
 );
 
 
@@ -39,11 +38,10 @@ CREATE TABLE IF NOT EXISTS files (
     file_name TEXT NOT NULL,
     file_type TEXT NOT NULL,
     file_size TEXT NOT NULL,
-    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
-    expire TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
+    expire TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
     description TEXT NOT NULL,
-    owner TEXT NOT NULL UNIQUE,
-
+    owner TEXT NOT NULL UNIQUE
 );
 
 
