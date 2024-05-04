@@ -14,12 +14,13 @@ DROP TABLE IF EXISTS files;
 CREATE TABLE IF NOT EXISTS files(
     id INTEGER PRIMARY KEY NOT NULL,
     filename TEXT NOT NULL,
-    filetype TEXT NOT NULL CHECK (filetype IN ('movie', 'song', 'episode', 'picture'))
+    filetype TEXT NOT NULL CHECK (filetype IN ('movie', 'song', 'episode', 'picture')),
     fileSize INTEGER NOT NULL,
     createdDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expirationDate TIMESTAMP,
-    descriotion TEXT,
+    description TEXT,  -- Corrected typo here
     owner INTEGER NOT NULL,
     FOREIGN KEY (owner) REFERENCES users(id)
-):
+);
+
 
