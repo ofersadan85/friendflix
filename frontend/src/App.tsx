@@ -1,6 +1,6 @@
 
 import './App.css';
-import MovieCard from './MovieCard';
+import { MovieList } from './MovieCard';
 
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
 
     return (
         <>
-            <MovieCard />
+            <MovieList />
         </>
     );
 }
