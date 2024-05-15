@@ -1,14 +1,15 @@
 
-import './App.css'
+import './App.css';
+import MovieCard from './MovieCard';
+
 
 function App() {
 
 
   return (
     <>
-      <h1>Hello FriendFlix!</h1>
+    <MovieCard/>
     </>
-  )
+  );
 }
-
-export default App
+export default App;
