@@ -6,10 +6,10 @@ import MovieCard from './MovieCard';
 function App() {
 
 
-  return (
-    <>
-    <MovieCard/>
-    </>
-  );
+    return (
+        <>
+            <MovieCard />
+        </>
+    );
 }
 export default App;
