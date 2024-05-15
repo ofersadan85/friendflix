@@ -13,6 +13,35 @@ body {
 }
 
 
+.moviePage {
+    ul {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        align-items: center;
+
+        li {
+            display: inline-block;
+            color: rgba(0, 0, 0, 0.3);
+            transition: color 0.3s;
+            transition-delay: 0.15s;
+            margin: 0 10px;
+
+            &:hover {
+                transition: color 0.3s;
+                color: rgba(0, 0, 0, 0.7);
+            }
+
+            i {
+                font-size: 19px;
+                cursor: pointer;
+                margin-right: 5px;
+
+            }
+        }
+    }
+}
+
 .movie_card {
     position: relative;
     display: block;
@@ -66,8 +95,8 @@ body {
                 position: relative;
                 float: left;
                 margin-right: 20px;
-                height: 120px;
-                width: 80px;
+                height: 240px;
+                width: 160px;
                 object-fit: cover;
                 object-position: center;
                 box-shadow: 0 0 20px -10px rgba(0, 0, 0, 0.5);

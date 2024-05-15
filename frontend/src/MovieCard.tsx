@@ -2,8 +2,8 @@
 import { useEffect, useState } from 'react';
 import './card.css';
 import { Movie } from './types';
-import { MoviePage } from './MoviePage';
 import { Link } from 'react-router-dom';
+import { useLastMovie } from './lastMovieCtx';
 
 
 function MovieCard(movie: Movie) {
@@ -37,6 +37,7 @@ function MovieCard(movie: Movie) {
 
 export function MovieList() {
     const [movies, setMovies] = useState<Movie[]>([]);
+    const [lastMovie, setLastMovie, clearLastMovie] = useLastMovie();
 
     useEffect(() => {
         fetch('https://api.themoviedb.org/3/discover/movie?&sort_by=revenue.desc&api_key=ffe5c55abd58ac422555285b6b0f1e30')
@@ -48,9 +49,12 @@ export function MovieList() {
 
     }, []);
 
+
     return (
         <>
-            {movies.map(movie => <MovieCard {...movie}/>)}
+            <h2>The last movie you watched was {lastMovie}</h2>
+            <button onClick={clearLastMovie}>Clear last movie</button>
+            {movies.map(movie => <MovieCard {...movie} key={movie.id}/>)}
         </>
     );
 

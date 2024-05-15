@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Actor, FullMovie } from "./types";
 import './card.css';
-import { MovieList, movieCardProps } from "./MovieCard";
 import { Link, useParams } from "react-router-dom";
+import { useLastMovie } from "./lastMovieCtx";
 
 
 function ActorCard(actor: Actor) {
@@ -19,7 +19,10 @@ export function MoviePage() {
     // const params = useParams();
     // const id = params.id;
     const { id } = useParams();
-    const [data, setData] = useState<FullMovie | null>(null)
+    const [data, setData] = useState<FullMovie | null>(null);
+    const [lastMovie, setLastMovie, clearLastMovie] = useLastMovie();
+
+
     useEffect(() => {
         fetch(`https://api.themoviedb.org/3/movie/${id}?append_to_response=credits&language=en-US&api_key=ffe5c55abd58ac422555285b6b0f1e30`)
             .then(response => response.json())
@@ -37,9 +40,12 @@ export function MoviePage() {
 
     if (!data) {
         return <h1>No data</h1>
+    } else {
+        setLastMovie(data.title);
     }
 
     return <div className="moviePage">
+        <h2>The last movie you watched was {lastMovie}</h2>
         <div className="info_section">
             <div className="movie_header">
                 <img className="locandina" src={full_poster_path} alt={data.title} />
