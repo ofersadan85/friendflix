@@ -9,3 +9,21 @@ export type Movie = {
     overview: string;
     vote_count: number;
 }
+
+export type Genre = {
+    id: number
+    name: string
+}
+
+export type Actor = {
+    id: number
+    name: string
+    profile_path: string,
+    character: string,
+}
+
+export type FullMovie = Movie & {
+    backdrop_path: string
+    genres: Genre[]
+    credits: { cast: Actor[] }
+}
