@@ -28,6 +28,8 @@ export function MoviePage() {
         backgroundImage: `url(${backdrop})`,
     }
 
+    const movieDate = new Date(movie.release_date);
+
     return (
         <div className="movie-page" style={backdropStyle}>
             <div className="backdrop-overlay"></div>
@@ -35,8 +37,13 @@ export function MoviePage() {
                 <div className="movie-header">
                     <img className="movie-poster" src={poster} alt={movie.title} />
                     <h1>{movie.title}</h1>
-                    <h4>{movie.release_date}</h4>
                 </div>
+                <div className="movie-buttons">
+                    <button title="Play">▶️</button>
+                    <button title="Add to Watchlist">➕</button>
+                    <button title="Like">👍</button>
+                </div>
+                <h4>{movieDate.getFullYear()}</h4>
                 <div className="movie-desc">{movie.overview}</div>
                 <div className="movie-social">
                     <ul>
@@ -44,7 +51,7 @@ export function MoviePage() {
                         <li>Vote: {movie.vote_count}</li>
                     </ul>
                 </div>
-            {cast && <div className="cast-cards">{cast.map(ActorCard)}</div>}
+                {cast && <div className="cast-cards">{cast.map(ActorCard)}</div>}
             </section>
             <Link to="/"><button>GO BACK</button></Link>
         </div>

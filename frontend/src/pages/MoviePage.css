@@ -27,6 +27,20 @@
     z-index: 2;
 }
 
+.movie-buttons {
+    display: flex;
+    gap: 20px;
+
+    button {
+        padding: 10px 20px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+}
+
 .movie-page h1 {
     margin-bottom: 20px;
 }
