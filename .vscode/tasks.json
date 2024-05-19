@@ -1,0 +1,68 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "DB Reset",
+            "command": "flask reset all",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}/backend"
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flask run",
+            "command": "flask run",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}/backend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false,
+                "group": "dev"
+            }
+        },
+        {
+            "label": "Vite dev",
+            "command": "npm run dev",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}/frontend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false,
+                "group": "dev"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Local Server",
+            "dependsOn": [
+                "Flask run",
+                "Vite dev"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false,
+                "group": "dev"
+            }
+        }
+    ]
+}

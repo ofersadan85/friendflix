@@ -1,0 +1,12 @@
+.tvshow-list,
+.movie-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 1rem;
+
+    a {
+        color: white;
+        text-decoration: none;
+    }
+}

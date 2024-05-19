@@ -1,0 +1,40 @@
+.movie-card,
+.tvshow-card {
+    display: inline-block;
+    margin: 0.5rem;
+    text-align: center;
+    width: 150px;
+    position: relative;
+}
+
+.movie-card img,
+.tvshow-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.movie-info,
+.tvshow-info {
+    font-size: smaller;
+    margin-top: 0.5rm;
+    text-align: left;
+
+    h3, p {
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+    }
+}
+
+.movie-card .watched-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #4db288;
+    font-size: 1.2rem;
+    padding: 0.2rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
