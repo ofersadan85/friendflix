@@ -1,4 +1,4 @@
-import { tmdbImageUrl } from "../tmdb";
+import { tmdbImageUrl } from "../backend";
 import { Actor } from "../types";
 import "./ActorCard.css";
 

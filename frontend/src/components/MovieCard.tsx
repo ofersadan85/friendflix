@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { tmdbImageUrl } from "../tmdb";
+import { tmdbImageUrl } from "../backend";
 import { Movie } from "../types";
 import './MovieCard.css';
 

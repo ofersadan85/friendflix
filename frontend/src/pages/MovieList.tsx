@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getMovies } from "../tmdb";
-import { Movie } from "../types";
+import { getMovies } from "../backend";
 import MovieCard from "../components/MovieCard";
+import { Movie } from "../types";
 import './MovieList.css';
 
 export default function MovieList() {

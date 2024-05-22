@@ -10,6 +10,10 @@ export function tmdbImageUrl(path: string, quality: string = 'original') {
     return `https://image.tmdb.org/t/p/${quality}${path}`;
 }
 
+export function doMovieAction(movie_id: number, action: "like" | "play" | "watchlist") {
+    return fetch(`${BASE_URL}/actions?movie_id=${movie_id}&action=${action}`)
+}
+
 export function getMovies() {
     return fetch(`${BASE_URL}/movies`)
         .then(response => response.json())

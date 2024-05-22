@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { doMovieAction, getFullMovie, tmdbImageUrl } from "../backend";
 import { ActorCard } from "../components/ActorCard";
-import { getFullMovie, tmdbImageUrl } from "../tmdb";
 import { FullMovie } from "../types";
 import "./MoviePage.css";
 
@@ -39,9 +39,9 @@ export function MoviePage() {
                     <h1>{movie.title}</h1>
                 </div>
                 <div className="movie-buttons">
-                    <button title="Play">▶️</button>
-                    <button title="Add to Watchlist">➕</button>
-                    <button title="Like">👍</button>
+                    <button title="Play" onClick={() => doMovieAction(movieId, "play")}>▶️</button>
+                    <button title="Add to Watchlist" onClick={() => doMovieAction(movieId, "watchlist")}>➕</button>
+                    <button title="Like" onClick={() => doMovieAction(movieId, "like")}>👍</button>
                 </div>
                 <h4>{movieDate.getFullYear()}</h4>
                 <div className="movie-desc">{movie.overview}</div>
