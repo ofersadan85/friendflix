@@ -6,7 +6,7 @@ from db.db import close_db
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
-from user_actions import actions_bp
+from views.user_actions import actions_bp
 
 app = Flask(__name__)
 app.teardown_appcontext(close_db)
