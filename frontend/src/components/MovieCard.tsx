@@ -3,8 +3,6 @@ import { tmdbImageUrl } from "../backend";
 import { Movie } from "../types";
 import './MovieCard.css';
 
-type MovieCardProps = Movie & { watched: boolean };
-
 export function MovieCardSkeleton() {
     return (
         <div className="movie-card-skeleton">
@@ -17,9 +15,8 @@ export function MovieCardSkeleton() {
     )
 }
 
-export default function MovieCard({ id, title, release_date, poster_path, watched }: MovieCardProps) {
+export default function MovieCard({ id, title, release_date, poster_path, watched }: Movie) {
     const poster = tmdbImageUrl(poster_path, "w154");
-    watched = Math.random() > 0.5;  // TODO: Actually implement this feature
     return (
         <Link to={`/movie/${id}`}>
             <div className="movie-card">

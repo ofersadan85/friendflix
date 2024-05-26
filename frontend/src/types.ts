@@ -8,6 +8,7 @@ export type Movie = {
     vote_average: number;
     overview: string;
     vote_count: number;
+    watched: boolean;
 }
 
 export type Genre = {

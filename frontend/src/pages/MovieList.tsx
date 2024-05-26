@@ -26,7 +26,7 @@ export default function MovieList() {
             <section className="movie-section">
                 <h2>Most popular movies</h2>
                 <div className="movie-list">
-                    {movies.length === 0 ? skeletons : movies.map(movie => <MovieCard key={movie.id} watched {...movie} />)}
+                    {movies.length === 0 ? skeletons : movies.map(movie => <MovieCard key={movie.id} {...movie} />)}
                 </div>
             </section>
         </ErrorBoundary>
