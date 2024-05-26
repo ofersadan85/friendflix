@@ -1,15 +1,45 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { doMovieAction, getFullMovie, tmdbImageUrl } from "../backend";
-import { ActorCard } from "../components/ActorCard";
+import { ActorCard, ActorCardSkeleton } from "../components/ActorCard";
 import { FullMovie } from "../types";
 import "./MoviePage.css";
+
+export function MoviePageSkeleton() {
+    const castSkeletons = Array(8).fill(<ActorCardSkeleton />)
+    return (
+        <div className="movie-page">
+            <div className="backdrop-overlay"></div>
+            <section className="info-section">
+                <div className="movie-header">
+                    <div className="movie-poster-skeleton" />
+                    <h1></h1>
+                </div>
+                <div className="movie-buttons">
+                    <button title="Play" disabled>▶️</button>
+                    <button title="Add to Watchlist" disabled>➕</button>
+                    <button title="Like" disabled>👍</button>
+                </div>
+                <h4></h4>
+                <div className="movie-desc"></div>
+                <div className="movie-social">
+                    <ul>
+                        <li>Stars: </li>
+                        <li>Vote: </li>
+                    </ul>
+                </div>
+                <div className="cast-cards">{castSkeletons}</div>
+            </section>
+            <Link to="/"><button>GO BACK</button></Link>
+        </div>
+    )
+
+}
 
 export function MoviePage() {
     const { id } = useParams();
     const movieId = parseInt(id || "");
     const [movie, setMovie] = useState<FullMovie | null>(null);
-
 
     useEffect(() => {
         if (!movieId || isNaN(movieId)) setMovie(null);
@@ -21,7 +51,7 @@ export function MoviePage() {
     const poster = movie && tmdbImageUrl(movie.poster_path, "w342") || "";
 
     if (!movie) {
-        return <h1>Loading...</h1>
+        return <MoviePageSkeleton />
     }
 
     const backdropStyle: React.CSSProperties = {

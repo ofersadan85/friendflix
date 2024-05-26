@@ -5,6 +5,18 @@ import './MovieCard.css';
 
 type MovieCardProps = Movie & { watched: boolean };
 
+export function MovieCardSkeleton() {
+    return (
+        <div className="movie-card-skeleton">
+            <div className="movie-poster"></div>
+            <div className="movie-info">
+                <h3></h3>
+                <p></p>
+            </div>
+        </div>
+    )
+}
+
 export default function MovieCard({ id, title, release_date, poster_path, watched }: MovieCardProps) {
     const poster = tmdbImageUrl(poster_path, "w154");
     watched = Math.random() > 0.5;  // TODO: Actually implement this feature
