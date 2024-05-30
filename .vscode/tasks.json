@@ -2,18 +2,6 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "DB Reset",
-            "command": "flask reset all",
-            "type": "shell",
-            "options": {
-                "cwd": "${workspaceRoot}/backend"
-            },
-            "presentation": {
-                "reveal": "silent"
-            },
-            "problemMatcher": []
-        },
-        {
             "label": "Flask run",
             "command": "flask run",
             "type": "shell",
@@ -28,7 +16,8 @@
                 "showReuseMessage": false,
                 "clear": false,
                 "group": "dev"
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "Vite dev",
@@ -49,10 +38,10 @@
             "problemMatcher": []
         },
         {
-            "label": "Local Server",
+            "label": "DEV Server",
             "dependsOn": [
                 "Flask run",
-                "Vite dev"
+                "Vite dev",
             ],
             "presentation": {
                 "echo": true,
@@ -62,6 +51,60 @@
                 "showReuseMessage": false,
                 "clear": false,
                 "group": "dev"
+            }
+        },
+        {
+            "label": "Vitest",
+            "command": "npm test",
+            "group": "test",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}/frontend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false,
+                "group": "test"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Pytest",
+            "command": "pytest",
+            "group": "test",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceRoot}/backend"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false,
+                "group": "test"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Test",
+            "dependsOn": [
+                "Vitest",
+                "Pytest"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false,
+                "group": "test"
             }
         }
     ]
