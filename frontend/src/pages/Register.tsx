@@ -1,31 +1,109 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDebounceCallback } from "usehooks-ts";
 import { BACKEND_URL } from "../backend";
-import { ValidatedInput, ValidatedInputRef } from "../components/ValidatedInput";
 import "./Register.css";
+
+type formState = {
+    usernameError?: string | null
+    emailError?: string | null
+    passwordError?: string | null
+    password2Error?: string | null
+    formError?: string | null
+    isSubmitting: boolean
+    isNew: boolean
+}
 
 
 export default function Register() {
-    console.debug("Rendering Register form");
-    const formRef = useRef<HTMLFormElement>(null);
-    const [formErrors, setFormErrors] = useState<string[]>([""]);
+    const [formState, setFormState] = useState<formState>({ isSubmitting: false, isNew: true });
 
-    const usernameRef = useRef<ValidatedInputRef>(null);
-    const emailRef = useRef<ValidatedInputRef>(null);
-    const passwordRef = useRef<ValidatedInputRef>(null);
-    const password2Ref = useRef<ValidatedInputRef>(null);
+    // Username field
+    const usernameRef = useRef<HTMLInputElement>(null);
+    const usernameValidator = useDebounceCallback(async () => {
+        const username = usernameRef.current?.value || "";
+        if (username.length < 3) {
+            setFormState(prev => ({ ...prev, isNew: false, usernameError: "Username must be at least 3 characters long" }));
+            return;
+        }
+        const params = new URLSearchParams({ username });
+        const response = await fetch(`${BACKEND_URL}/register/check?${params}`);
+        if (!response.ok) {
+            setFormState(prev => ({ ...prev, isNew: false, usernameError: "Username is not available" }));
+            return;
+        }
+        // If we got here, the username is available, but we still want to set isNew to false, and we clear the error
+        setFormState(prev => ({ ...prev, isNew: false, usernameError: null }));
+    }, 500);
+    const usernameErrorIcon = formState.isNew ? null : formState.usernameError ? "❌" : null;
+    const usernameInput = <>
+        <label htmlFor="username">Username{usernameErrorIcon && <span>{usernameErrorIcon}</span>}</label>
+        <input type="text" name="username" ref={usernameRef} onChange={usernameValidator} />
+        {formState.usernameError && <div role="alert" className="error">{formState.usernameError}</div>}
+    </>
+
+    // Email field
+    const emailRef = useRef<HTMLInputElement>(null);
+    const emailValidator = () => {
+        if (emailRef.current?.value.includes("@")) {
+            setFormState(prev => ({ ...prev, isNew: false, emailError: null }));
+        } else {
+            setFormState(prev => ({ ...prev, isNew: false, emailError: "Invalid email address" }));
+        }
+    }
+    const emailErrorIcon = formState.isNew ? null : formState.emailError ? "❌" : null;
+    const emailInput = <>
+        <label htmlFor="email">Email{emailErrorIcon && <span>{emailErrorIcon}</span>}</label>
+        <input type="email" name="email" ref={emailRef} onChange={emailValidator} />
+        {formState.emailError && <div role="alert" className="error">{formState.emailError}</div>}
+    </>
+
+    // Password fields
+    const passwordRef = useRef<HTMLInputElement>(null);
+    const password2Ref = useRef<HTMLInputElement>(null);
+    const passwordValidator = () => {
+        const password = passwordRef.current?.value || "";
+        const password2 = password2Ref.current?.value || "";
+        if (password.length < 8) {
+            setFormState(prev => ({ ...prev, isNew: false, passwordError: "Password must be at least 8 characters long" }));
+        } else if (password && password !== password2) {
+            setFormState(prev => ({ ...prev, isNew: false, passwordError: "Passwords do not match" }));
+        } else {
+            setFormState(prev => ({ ...prev, isNew: false, passwordError: null }));
+        }
+    }
+    const passwordErrorIcon = formState.isNew ? null : formState.passwordError ? "❌" : null;
+    const passwordInput = <>
+        <label htmlFor="password">Password{passwordErrorIcon && <span>{passwordErrorIcon}</span>}</label>
+        <input type="password" name="password" ref={passwordRef} onChange={passwordValidator} />
+        {formState.passwordError && <div role="alert" className="error">{formState.passwordError}</div>}
+        <input type="password" name="password2" ref={password2Ref} onChange={passwordValidator} />
+    </>
+
+    const formValidation = () => {
+        if (formState.isNew) return [false, false, false]
+        const username = usernameRef.current?.value || "";
+        const email = emailRef.current?.value || "";
+        const password = passwordRef.current?.value || "";
+        const password2 = password2Ref.current?.value || "";
+        return [
+            username.length > 3 && !formState.usernameError ? username : false,
+            email.includes("@") && !formState.emailError ? email : false,
+            password.length >= 8 && password === password2 && !formState.passwordError ? password : false,
+        ]
+    }
+
     const navigate = useNavigate();
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();  // Prevent the form from submitting the normal way (refreshing the page)
         console.debug("Submitting register form");
+        setFormState(prev => ({ ...prev, isSubmitting: true }));
         setTimeout(() => {
             console.debug("Timeout expired, still waiting for response");
-            // TODO: Show a message to the user that the request is taking longer than expected
-        }, 10_000);
+            setFormState(prev => ({ ...prev, formError: "Registration is taking longer than expected, if this continues please try again later" }));
+        }, 10_000);  // 10 seconds timeout
 
-        const username = usernameRef.current?.value()
-        const email = emailRef.current?.value()
-        const password = passwordRef.current?.value()
+        const [username, email, password] = formValidation();
         const response = await fetch(`${BACKEND_URL}/register`, {
             method: 'POST',
             body: JSON.stringify({ username, email, password }),
@@ -38,36 +116,21 @@ export default function Register() {
             navigate("/login?registered=true");
         } else {
             console.error("Registration failed", response, await response.text());
-            // TODO: Show an error message to the user
+            setFormState(prev => ({ ...prev, formError: "Registration failed, please try again later" }));
         }
     }
-    const usernameValidator = async (v: string) => {
-        if (v.length < 3) return "Username must be at least 3 characters long";
-        const params = new URLSearchParams({ username: v });
-        const response = await fetch(`${BACKEND_URL}/register/check?${params}`);
-        return response.ok ? null : "Username is not available";
-    }
-    const emailValidator = (v: string) => v.includes("@") ? null : "Invalid email address";
-    const passwordValidator = (v: string) => v.length < 8 ? "Password must be at least 8 characters long" : null;
-    const passwordMatchValidator = () => passwordRef.current?.value() === password2Ref.current?.value() ? null : "Passwords do not match";
 
-    const changeHandler = () => {
-        console.debug("Form changed");
-        const errors = [usernameRef, emailRef, passwordRef, password2Ref].map(ref => ref.current?.error()).filter(e => e);
-        setFormErrors(errors as string[]);
-        console.debug("Form errors", errors);
-    }
-    const submitDisabled = formErrors.length > 0;
+    const submitDisabled = formState.isNew || formState.isSubmitting || formValidation().includes(false);
+    const submitText = formState.isSubmitting ? "Registering..." : "Register";
     return (
         <div className="register-form" >
             <h2>Register</h2>
-            <form onSubmit={handleSubmit} onChange={changeHandler} ref={formRef}>
-                <ValidatedInput type="text" label="Username" validator={usernameValidator} debounce={500} ref={usernameRef} />
-                <ValidatedInput type="email" label="Email" validator={emailValidator} ref={emailRef} />
-                <ValidatedInput type="password" label="Password" validator={passwordValidator} ref={passwordRef} />
-                <ValidatedInput type="password" label="Confirm Password" name="password2" validator={passwordMatchValidator} ref={password2Ref} />
-                <div role="alert" className="error"></div>
-                <button type="submit" disabled={submitDisabled}>Register</button>
+            <form onSubmit={handleSubmit}>
+                {usernameInput}
+                {emailInput}
+                {passwordInput}
+                {formState.formError && <div role="alert" className="error"></div>}
+                <button type="submit" disabled={!!submitDisabled}>{submitText}</button>
                 <Link to="/"><button type="reset">Go Back</button></Link>
             </form>
         </div>
