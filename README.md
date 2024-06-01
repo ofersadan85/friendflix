@@ -19,7 +19,13 @@ Build the backend dependencies. Make sure to run the following commands in the `
 pip install -r requirements.txt
 ```
 
+> [!WARNING]  
+> Change the value of the `FLASK_SECRET_KEY` in the [backend/.env](backend/.env) file to a random string. This is used to secure the session cookies / JWT tokens.
+
 This project must have a valid API key for TMDB. Copy the file [backend/example.env](backend/example.env) to `backend/.env` and replace the placeholder for `TMDB_API_KEY` with a valid API key.
+
+> [!CAUTION]
+> The API key should be kept secret. Do not share it publicly.
 
 After that, you can run the backend server (inside the `backend` directory):
 

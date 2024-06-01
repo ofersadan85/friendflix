@@ -40,8 +40,8 @@ export default function Login() {
         if (response.ok) {
             const data = await response.json();
             try {
-                const user = jwtDecode(data.token);
-                setUser(user as User);
+                const user: User = { token: data.token, ...jwtDecode(data.token) };
+                setUser(user);
                 navigate("/");
             } catch (error) {
                 console.error("Failed to decode token", error);
