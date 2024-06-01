@@ -1,0 +1,30 @@
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "npm"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+    directory: "/frontend/"
+    schedule:
+      interval: "monthly"
+
+  - package-ecosystem: "pip"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+    directory: "/backend/"
+    schedule:
+      interval: "monthly"
