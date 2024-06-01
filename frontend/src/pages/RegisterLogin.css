@@ -1,3 +1,4 @@
+.login-form,
 .register-form {
     background: #ffffff;
     padding: 30px;
@@ -7,12 +8,14 @@
     width: 100vw;
 }
 
+.login-form h2,
 .register-form h2 {
     margin-bottom: 20px;
     font-size: 24px;
     color: #333;
 }
 
+.login-form label,
 .register-form label {
     display: block;
     margin-bottom: 8px;
@@ -20,6 +23,8 @@
     color: #555;
 }
 
+.login-form input[type="text"],
+.login-form input[type="password"],
 .register-form input[type="text"],
 .register-form input[type="email"],
 .register-form input[type="password"] {
@@ -32,6 +37,7 @@
     box-sizing: border-box;
 }
 
+.login-form .error,
 .register-form .error {
     padding: 0;
     color: #d9534f;
@@ -40,6 +46,7 @@
     margin-bottom: 20px;
 }
 
+.login-form button[type="submit"],
 .register-form button[type="submit"] {
     background: #5cb85c;
     color: #fff;
@@ -52,12 +59,13 @@
     margin-bottom: 20px;
 }
 
+.login-form button[type="submit"]:disabled,
 .register-form button[type="submit"]:disabled {
     background: #ccc;
     cursor: not-allowed;
 }
 
-
+.login-form button[type="reset"],
 .register-form button[type="reset"] {
     background: #808080;
     color: #fff;
