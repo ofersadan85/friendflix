@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
+        "appcontext",
         "friendflix",
         "pytest",
         "tmdb",
-        "tvshow"
+        "tvshow",
+        "usehooks",
+        "watchlist"
     ]
 }

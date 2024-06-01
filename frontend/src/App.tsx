@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import MovieList from './pages/MovieList';
 import { MoviePage } from './pages/MoviePage';
+import Register from './pages/Register';
 
 export default function App() {
     return (
@@ -11,6 +12,7 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<MovieList />} />
                     <Route path="/movie/:id" element={<MoviePage />} />
+                    <Route path="/register" element={<Register />} />
                 </Routes>
             </BrowserRouter>
         </ErrorBoundary>

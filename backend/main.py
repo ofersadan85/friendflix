@@ -6,10 +6,12 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from views.user_actions import actions_bp
+from views.auth import auth_bp
 
 app = Flask(__name__)
 app.teardown_appcontext(close_db)
 app.register_blueprint(actions_bp)
+app.register_blueprint(auth_bp)
 load_dotenv()
 app.config.from_prefixed_env()
 FRONTEND_URL = app.config["FRONTEND_URL"]
