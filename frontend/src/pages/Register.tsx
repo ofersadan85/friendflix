@@ -38,7 +38,7 @@ export default function Register() {
     const usernameErrorIcon = formState.isNew ? null : formState.usernameError ? "❌" : null;
     const usernameInput = <>
         <label htmlFor="username">Username{usernameErrorIcon && <span>{usernameErrorIcon}</span>}</label>
-        <input type="text" name="username" ref={usernameRef} onChange={usernameValidator} />
+        <input type="text" name="username" id="username" ref={usernameRef} onChange={usernameValidator} />
         {formState.usernameError && <div role="alert" className="error">{formState.usernameError}</div>}
     </>
 
@@ -54,7 +54,7 @@ export default function Register() {
     const emailErrorIcon = formState.isNew ? null : formState.emailError ? "❌" : null;
     const emailInput = <>
         <label htmlFor="email">Email{emailErrorIcon && <span>{emailErrorIcon}</span>}</label>
-        <input type="email" name="email" ref={emailRef} onChange={emailValidator} />
+        <input type="email" name="email" id="email" ref={emailRef} onChange={emailValidator} />
         {formState.emailError && <div role="alert" className="error">{formState.emailError}</div>}
     </>
 
@@ -75,9 +75,10 @@ export default function Register() {
     const passwordErrorIcon = formState.isNew ? null : formState.passwordError ? "❌" : null;
     const passwordInput = <>
         <label htmlFor="password">Password{passwordErrorIcon && <span>{passwordErrorIcon}</span>}</label>
-        <input type="password" name="password" ref={passwordRef} onChange={passwordValidator} />
+        <input type="password" name="password" id="password" ref={passwordRef} onChange={passwordValidator} />
         {formState.passwordError && <div role="alert" className="error">{formState.passwordError}</div>}
-        <input type="password" name="password2" ref={password2Ref} onChange={passwordValidator} />
+        <label htmlFor="password2">Confirm Password</label>
+        <input type="password" name="password2" id="password2" ref={password2Ref} onChange={passwordValidator} />
     </>
 
     const formValidation = () => {
