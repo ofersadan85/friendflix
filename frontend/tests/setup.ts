@@ -9,7 +9,7 @@ export const mockedFetch = vi.fn(async (path: string) => {
             return { ok: true }
         }
     } else {
-        return { ok: true }
+        return { ok: true, json: () => ({ results: [] })}
     }
 })
 
