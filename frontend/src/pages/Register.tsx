@@ -14,12 +14,12 @@ type formState = {
     isNew: boolean
 }
 
-
 export default function Register() {
     const [formState, setFormState] = useState<formState>({ isSubmitting: false, isNew: true });
 
     // Username field
     const usernameRef = useRef<HTMLInputElement>(null);
+    const debounceDelay = import.meta.env.TEST ? 0 : 500;
     const usernameValidator = useDebounceCallback(async () => {
         const username = usernameRef.current?.value || "";
         if (username.length < 3) {
@@ -34,7 +34,7 @@ export default function Register() {
         }
         // If we got here, the username is available, but we still want to set isNew to false, and we clear the error
         setFormState(prev => ({ ...prev, isNew: false, usernameError: null }));
-    }, 500);
+    }, debounceDelay);
     const usernameErrorIcon = formState.isNew ? null : formState.usernameError ? "❌" : null;
     const usernameInput = <>
         <label htmlFor="username">Username{usernameErrorIcon && <span>{usernameErrorIcon}</span>}</label>
