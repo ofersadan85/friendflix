@@ -15,7 +15,7 @@ app.register_blueprint(actions_bp)
 app.register_blueprint(auth_bp)
 load_dotenv()
 app.config.from_prefixed_env()
-FRONTEND_URL = app.config["FRONTEND_URL"]
+FRONTEND_URL = app.config.get("FRONTEND_URL", "*")
 cors = CORS(app, origins=FRONTEND_URL, methods=["GET", "POST", "DELETE"])
 jwt = JWTManager(app)
 
