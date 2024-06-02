@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useReducer, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDebounceCallback } from "usehooks-ts";
 import { BACKEND_URL } from "../backend";
@@ -16,6 +16,7 @@ type formState = {
 
 export default function Register() {
     const [formState, setFormState] = useState<formState>({ isSubmitting: false, isNew: true });
+    // TODO: Use useReducer to make it easier and more efficient for React but harder for us
 
     // Username field
     const usernameRef = useRef<HTMLInputElement>(null);
