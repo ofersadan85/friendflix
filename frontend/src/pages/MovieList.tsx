@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getMovies } from "../backend";
+import { useBackendFetch } from "../backend";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import MovieCard, { MovieCardSkeleton } from "../components/MovieCard";
 import { Movie } from "../types";
@@ -15,8 +15,9 @@ function MovieListError() {
 
 export default function MovieList() {
     const [movies, setMovies] = useState<Movie[]>([]);
+    const fetcher = useBackendFetch("/movies");
     useEffect(() => {
-        getMovies().then(movies => setMovies(movies));
+        fetcher.then(response => response.json()).then(data => setMovies(data.results));
     }, []);
 
     const skeletons = Array(8).fill(<MovieCardSkeleton />)

@@ -1,6 +1,4 @@
-import { jwtDecode } from "jwt-decode";
 import { useLocalStorage } from "usehooks-ts";
-import { FullMovie, Movie } from "./types";
 import { User } from "./user";
 
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
@@ -15,8 +13,7 @@ export function tmdbImageUrl(path: string, quality: string = 'original') {
     return `https://image.tmdb.org/t/p/${quality}${path}`;
 }
 
-
-export async function useBackendFetch(url: string, options?: RequestInit, data?: Record<string, any>) {
+export async function useBackendFetch(url: string, options?: RequestInit, data?: Record<string, any>): Promise<Response> {
     const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
     if (user) {
         console.debug("Adding Authorization header to request", user);
@@ -38,63 +35,4 @@ export async function useBackendFetch(url: string, options?: RequestInit, data?:
         removeUser();
     }
     return response;
-}
-
-export async function login(username_or_email: string, password: string) {
-    const response = await fetch(`${BACKEND_URL}/login`, {
-        method: 'POST',
-        body: JSON.stringify({ username_or_email: username_or_email, password: password }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-    const { token } = await response.json();
-    const user: User = {
-        ...jwtDecode(token),
-        token: token
-    }
-    const [_user, setUser, _removeUser] = useLocalStorage<User | null>("user", null);
-    setUser(user);
-}
-
-export function register(username: string, email: string, password: string) {
-    // TODO: Return the user object / token from the backend to skip the need for another login request
-    return fetch(`${BACKEND_URL}/register`, {
-        method: 'POST',
-        body: JSON.stringify({ username, email, password }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-}
-
-export function logout() {
-    const [_user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
-    removeUser();
-    fetch(`${BACKEND_URL}/logout`);  // we don't care about the response, so no "await" or "return""
-}
-
-export async function checkUsernameAvailable(username: string): Promise<boolean> {
-    if (username.length < 3) return false;
-    const response = await useBackendFetch("/register/check/username", { method: 'GET' }, { username });
-    return response.status === 200;
-}
-
-export function doMovieAction(movie_id: number, action: "like" | "play" | "watchlist") {
-    // This function is not async, because we don't care about the response
-    // We don't need to wait for the backend to respond before updating the UI
-    // If we need to verify that the action was successful, we can do that later
-    return useBackendFetch("/actions", { method: 'GET' }, { movie_id, action });
-}
-
-export async function getMovies(): Promise<Movie[]> {
-    const response = await useBackendFetch("/movies");
-    const data = await response.json();
-    return data.results;
-}
-
-export async function getFullMovie(id: number): Promise<FullMovie> {
-    const response = await useBackendFetch(`/movies/${id}`);
-    const data = await response.json();
-    return data;
 }
