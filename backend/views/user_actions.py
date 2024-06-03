@@ -1,5 +1,3 @@
-import sqlite3
-
 from db.db import get_db
 from db.user_actions import do_action as do_action_db
 from flask import Blueprint, request

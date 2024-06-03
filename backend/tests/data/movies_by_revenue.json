@@ -1,0 +1,411 @@
+{
+    "page": 1,
+    "results": [
+        {
+            "adult": false,
+            "backdrop_path": "/vL5LR6WdxWPjLPFRLe133jXWsh5.jpg",
+            "genre_ids": [
+                28,
+                12,
+                14,
+                878
+            ],
+            "id": 19995,
+            "original_language": "en",
+            "original_title": "Avatar",
+            "overview": "In the 22nd century, a paraplegic Marine is dispatched to the moon Pandora on a unique mission, but becomes torn between following orders and protecting an alien civilization.",
+            "popularity": 160.803,
+            "poster_path": "/kyeqWdyUXW608qlYkRqosgbbJyK.jpg",
+            "release_date": "2009-12-15",
+            "title": "Avatar",
+            "video": false,
+            "vote_average": 7.581,
+            "vote_count": 30901
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/7RyHsO4yDXtBv1zUU3mTpHeQ0d5.jpg",
+            "genre_ids": [
+                12,
+                878,
+                28
+            ],
+            "id": 299534,
+            "original_language": "en",
+            "original_title": "Avengers: Endgame",
+            "overview": "After the devastating events of Avengers: Infinity War, the universe is in ruins due to the efforts of the Mad Titan, Thanos. With the help of remaining allies, the Avengers must assemble once more in order to undo Thanos' actions and restore order to the universe once and for all, no matter what consequences may be in store.",
+            "popularity": 201.773,
+            "poster_path": "/or06FN3Dka5tukK1e9sl16pB3iy.jpg",
+            "release_date": "2019-04-24",
+            "title": "Avengers: Endgame",
+            "video": false,
+            "vote_average": 8.253,
+            "vote_count": 24935
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/8rpDcsfLJypbO6vREc0547VKqEv.jpg",
+            "genre_ids": [
+                878,
+                12,
+                28
+            ],
+            "id": 76600,
+            "original_language": "en",
+            "original_title": "Avatar: The Way of Water",
+            "overview": "Set more than a decade after the events of the first film, learn the story of the Sully family (Jake, Neytiri, and their kids), the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure.",
+            "popularity": 317.262,
+            "poster_path": "/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+            "release_date": "2022-12-14",
+            "title": "Avatar: The Way of Water",
+            "video": false,
+            "vote_average": 7.625,
+            "vote_count": 11336
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/5YLNDnkO0cZZwog2StyR3YmmBPh.jpg",
+            "genre_ids": [
+                18,
+                10749
+            ],
+            "id": 597,
+            "original_language": "en",
+            "original_title": "Titanic",
+            "overview": "101-year-old Rose DeWitt Bukater tells the story of her life aboard the Titanic, 84 years later. A young Rose boards the ship with her mother and fiancé. Meanwhile, Jack Dawson and Fabrizio De Rossi win third-class tickets aboard the ship. Rose tells the whole story from Titanic's departure through to its death—on its first and last voyage—on April 15, 1912.",
+            "popularity": 154.386,
+            "poster_path": "/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
+            "release_date": "1997-11-18",
+            "title": "Titanic",
+            "video": false,
+            "vote_average": 7.905,
+            "vote_count": 24689
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/k6EOrckWFuz7I4z4wiRwz8zsj4H.jpg",
+            "genre_ids": [
+                12,
+                28,
+                878
+            ],
+            "id": 140607,
+            "original_language": "en",
+            "original_title": "Star Wars: The Force Awakens",
+            "overview": "Thirty years after defeating the Galactic Empire, Han Solo and his allies face a new threat from the evil Kylo Ren and his army of Stormtroopers.",
+            "popularity": 93.425,
+            "poster_path": "/wqnLdwVXoBjKibFRR5U3y0aDUhs.jpg",
+            "release_date": "2015-12-15",
+            "title": "Star Wars: The Force Awakens",
+            "video": false,
+            "vote_average": 7.281,
+            "vote_count": 18955
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/mDfJG3LC3Dqb67AZ52x3Z0jU0uB.jpg",
+            "genre_ids": [
+                12,
+                28,
+                878
+            ],
+            "id": 299536,
+            "original_language": "en",
+            "original_title": "Avengers: Infinity War",
+            "overview": "As the Avengers and their allies have continued to protect the world from threats too large for any one hero to handle, a new danger has emerged from the cosmic shadows: Thanos. A despot of intergalactic infamy, his goal is to collect all six Infinity Stones, artifacts of unimaginable power, and use them to inflict his twisted will on all of reality. Everything the Avengers have fought for has led up to this moment - the fate of Earth and existence itself has never been more uncertain.",
+            "popularity": 284.737,
+            "poster_path": "/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+            "release_date": "2018-04-25",
+            "title": "Avengers: Infinity War",
+            "video": false,
+            "vote_average": 8.246,
+            "vote_count": 28945
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg",
+            "genre_ids": [
+                28,
+                12,
+                878
+            ],
+            "id": 634649,
+            "original_language": "en",
+            "original_title": "Spider-Man: No Way Home",
+            "overview": "Peter Parker is unmasked and no longer able to separate his normal life from the high-stakes of being a super-hero. When he asks for help from Doctor Strange the stakes become even more dangerous, forcing him to discover what it truly means to be Spider-Man.",
+            "popularity": 319.875,
+            "poster_path": "/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
+            "release_date": "2021-12-15",
+            "title": "Spider-Man: No Way Home",
+            "video": false,
+            "vote_average": 7.966,
+            "vote_count": 19453
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/dF6FjTZzRTENfB4R17HDN20jLT2.jpg",
+            "genre_ids": [
+                28,
+                12,
+                878,
+                53
+            ],
+            "id": 135397,
+            "original_language": "en",
+            "original_title": "Jurassic World",
+            "overview": "Twenty-two years after the events of Jurassic Park, Isla Nublar now features a fully functioning dinosaur theme park, Jurassic World, as originally envisioned by John Hammond.",
+            "popularity": 100.688,
+            "poster_path": "/A0LZHXUzo5C60Oahvt7VxvwuzHw.jpg",
+            "release_date": "2015-06-06",
+            "title": "Jurassic World",
+            "video": false,
+            "vote_average": 6.687,
+            "vote_count": 19975
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/1TUg5pO1VZ4B0Q1amk3OlXvlpXV.jpg",
+            "genre_ids": [
+                12,
+                18,
+                10751,
+                16
+            ],
+            "id": 420818,
+            "original_language": "en",
+            "original_title": "The Lion King",
+            "overview": "Simba idolizes his father, King Mufasa, and takes to heart his own royal destiny. But not everyone in the kingdom celebrates the new cub's arrival. Scar, Mufasa's brother—and former heir to the throne—has plans of his own. The battle for Pride Rock is ravaged with betrayal, tragedy and drama, ultimately resulting in Simba's exile. With help from a curious pair of newfound friends, Simba will have to figure out how to grow up and take back what is rightfully his.",
+            "popularity": 197.337,
+            "poster_path": "/dzBtMocZuJbjLOXvrl4zGYigDzh.jpg",
+            "release_date": "2019-07-12",
+            "title": "The Lion King",
+            "video": false,
+            "vote_average": 7.114,
+            "vote_count": 9717
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/9BBTo63ANSmhC4e6r62OJFuK2GL.jpg",
+            "genre_ids": [
+                878,
+                28,
+                12
+            ],
+            "id": 24428,
+            "original_language": "en",
+            "original_title": "The Avengers",
+            "overview": "When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!",
+            "popularity": 156.048,
+            "poster_path": "/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+            "release_date": "2012-04-25",
+            "title": "The Avengers",
+            "video": false,
+            "vote_average": 7.714,
+            "vote_count": 30085
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/cHkhb5A4gQRK6zs6Pv7zorHs8Nk.jpg",
+            "genre_ids": [
+                28,
+                53,
+                80
+            ],
+            "id": 168259,
+            "original_language": "en",
+            "original_title": "Furious 7",
+            "overview": "Deckard Shaw seeks revenge against Dominic Toretto and his family for his comatose brother.",
+            "popularity": 97.451,
+            "poster_path": "/ktofZ9Htrjiy0P6LEowsDaxd3Ri.jpg",
+            "release_date": "2015-04-01",
+            "title": "Furious 7",
+            "video": false,
+            "vote_average": 7.235,
+            "vote_count": 10359
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/AaV1YIdWKnjAIAOe8UUKBFm327v.jpg",
+            "genre_ids": [
+                28,
+                18
+            ],
+            "id": 361743,
+            "original_language": "en",
+            "original_title": "Top Gun: Maverick",
+            "overview": "After more than thirty years of service as one of the Navy’s top aviators, and dodging the advancement in rank that would ground him, Pete “Maverick” Mitchell finds himself training a detachment of TOP GUN graduates for a specialized mission the likes of which no living pilot has ever seen.",
+            "popularity": 170.614,
+            "poster_path": "/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",
+            "release_date": "2022-05-21",
+            "title": "Top Gun: Maverick",
+            "video": false,
+            "vote_average": 8.218,
+            "vote_count": 8646
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/xJWPZIYOEFIjZpBL7SVBGnzRYXp.jpg",
+            "genre_ids": [
+                10751,
+                16,
+                12,
+                35,
+                14
+            ],
+            "id": 330457,
+            "original_language": "en",
+            "original_title": "Frozen II",
+            "overview": "Elsa, Anna, Kristoff and Olaf head far into the forest to learn the truth about an ancient mystery of their kingdom.",
+            "popularity": 103.505,
+            "poster_path": "/mINJaa34MtknCYl5AjtNJzWj8cD.jpg",
+            "release_date": "2019-11-20",
+            "title": "Frozen II",
+            "video": false,
+            "vote_average": 7.262,
+            "vote_count": 9463
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/ctMserH8g2SeOAnCw5gFjdQF8mo.jpg",
+            "genre_ids": [
+                35,
+                12
+            ],
+            "id": 346698,
+            "original_language": "en",
+            "original_title": "Barbie",
+            "overview": "Barbie and Ken are having the time of their lives in the colorful and seemingly perfect world of Barbie Land. However, when they get a chance to go to the real world, they soon discover the joys and perils of living among humans.",
+            "popularity": 408.146,
+            "poster_path": "/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg",
+            "release_date": "2023-07-19",
+            "title": "Barbie",
+            "video": false,
+            "vote_average": 7.054,
+            "vote_count": 8380
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/6YwkGolwdOMNpbTOmLjoehlVWs5.jpg",
+            "genre_ids": [
+                28,
+                12,
+                878
+            ],
+            "id": 99861,
+            "original_language": "en",
+            "original_title": "Avengers: Age of Ultron",
+            "overview": "When Tony Stark tries to jumpstart a dormant peacekeeping program, things go awry and Earth’s Mightiest Heroes are put to the ultimate test as the fate of the planet hangs in the balance. As the villainous Ultron emerges, it is up to The Avengers to stop him from enacting his terrible plans, and soon uneasy alliances and unexpected action pave the way for an epic and unique global adventure.",
+            "popularity": 122.773,
+            "poster_path": "/4ssDuvEDkSArWEdyBl2X5EHvYKU.jpg",
+            "release_date": "2015-04-22",
+            "title": "Avengers: Age of Ultron",
+            "video": false,
+            "vote_average": 7.273,
+            "vote_count": 22478
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/9n2tJBplPbgR2ca05hS5CKXwP2c.jpg",
+            "genre_ids": [
+                16,
+                10751,
+                12,
+                14,
+                35
+            ],
+            "id": 502356,
+            "original_language": "en",
+            "original_title": "The Super Mario Bros. Movie",
+            "overview": "While working underground to fix a water main, Brooklyn plumbers—and brothers—Mario and Luigi are transported down a mysterious pipe and wander into a magical new world. But when the brothers are separated, Mario embarks on an epic quest to find Luigi.",
+            "popularity": 253.411,
+            "poster_path": "/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
+            "release_date": "2023-04-05",
+            "title": "The Super Mario Bros. Movie",
+            "video": false,
+            "vote_average": 7.675,
+            "vote_count": 8480
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/b6ZJZHUdMEFECvGiDpJjlfUWela.jpg",
+            "genre_ids": [
+                28,
+                12,
+                878
+            ],
+            "id": 284054,
+            "original_language": "en",
+            "original_title": "Black Panther",
+            "overview": "King T'Challa returns home to the reclusive, technologically advanced African nation of Wakanda to serve as his country's new leader. However, T'Challa soon finds that he is challenged for the throne by factions within his own country as well as without. Using powers reserved to Wakandan kings, T'Challa assumes the Black Panther mantle to join with ex-girlfriend Nakia, the queen-mother, his princess-kid sister, members of the Dora Milaje (the Wakandan 'special forces') and an American secret agent, to prevent Wakanda from being dragged into a world war.",
+            "popularity": 337.893,
+            "poster_path": "/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",
+            "release_date": "2018-02-13",
+            "title": "Black Panther",
+            "video": false,
+            "vote_average": 7.385,
+            "vote_count": 21715
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/n5A7brJCjejceZmHyujwUTVgQNC.jpg",
+            "genre_ids": [
+                14,
+                12
+            ],
+            "id": 12445,
+            "original_language": "en",
+            "original_title": "Harry Potter and the Deathly Hallows: Part 2",
+            "overview": "Harry, Ron and Hermione continue their quest to vanquish the evil Voldemort once and for all. Just as things begin to look hopeless for the young wizards, Harry discovers a trio of magical objects that endow him with powers to rival Voldemort's formidable skills.",
+            "popularity": 129.174,
+            "poster_path": "/c54HpQmuwXjHq2C9wmoACjxoom3.jpg",
+            "release_date": "2011-07-12",
+            "title": "Harry Potter and the Deathly Hallows: Part 2",
+            "video": false,
+            "vote_average": 8.1,
+            "vote_count": 20022
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/epVMXf10WqFkONzKR8V76Ypj5Y3.jpg",
+            "genre_ids": [
+                12,
+                28,
+                878
+            ],
+            "id": 181808,
+            "original_language": "en",
+            "original_title": "Star Wars: The Last Jedi",
+            "overview": "Rey develops her newly discovered abilities with the guidance of Luke Skywalker, who is unsettled by the strength of her powers. Meanwhile, the Resistance prepares to do battle with the First Order.",
+            "popularity": 84.051,
+            "poster_path": "/kOVEVeg59E0wsnXmF9nrh6OmWII.jpg",
+            "release_date": "2017-12-13",
+            "title": "Star Wars: The Last Jedi",
+            "video": false,
+            "vote_average": 6.803,
+            "vote_count": 14882
+        },
+        {
+            "adult": false,
+            "backdrop_path": "/3s9O5af2xWKWR5JzP2iJZpZeQQg.jpg",
+            "genre_ids": [
+                28,
+                12,
+                878,
+                53
+            ],
+            "id": 351286,
+            "original_language": "en",
+            "original_title": "Jurassic World: Fallen Kingdom",
+            "overview": "Three years after Jurassic World was destroyed, Isla Nublar now sits abandoned. When the island's dormant volcano begins roaring to life, Owen and Claire mount a campaign to rescue the remaining dinosaurs from this extinction-level event.",
+            "popularity": 87.891,
+            "poster_path": "/XiyoA8Kk87UQ4svKRCRWepjIzf.jpg",
+            "release_date": "2018-06-06",
+            "title": "Jurassic World: Fallen Kingdom",
+            "video": false,
+            "vote_average": 6.547,
+            "vote_count": 11482
+        }
+    ],
+    "total_pages": 44474,
+    "total_results": 889478
+}

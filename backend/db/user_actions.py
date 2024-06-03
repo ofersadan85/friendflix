@@ -1,5 +1,6 @@
 import sqlite3
 
+
 def add_watched_status_to_movies(movies_data, user_id, cursor):
     cursor.execute("SELECT movie_id FROM user_actions WHERE user_id=? AND action_type='play'", [user_id])
     watched_ids = [row[0] for row in cursor.fetchall()]

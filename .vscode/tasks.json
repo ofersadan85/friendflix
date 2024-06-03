@@ -51,7 +51,8 @@
                 "showReuseMessage": false,
                 "clear": false,
                 "group": "dev"
-            }
+            },
+            "problemMatcher": [],
         },
         {
             "label": "Vitest",
@@ -105,7 +106,8 @@
                 "showReuseMessage": false,
                 "clear": false,
                 "group": "test"
-            }
+            },
+            "problemMatcher": []
         }
     ]
 }
