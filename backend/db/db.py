@@ -11,6 +11,7 @@ def get_db():
     if "db" not in g:
         g.db = sqlite3.connect(DB_PATH)
         g.db.row_factory = sqlite3.Row
+        g.db.autocommit = True
     return g.db
 
 

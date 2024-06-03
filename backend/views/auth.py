@@ -1,5 +1,7 @@
+from sqlite3 import IntegrityError
+
 from db.db import get_db
-from flask import Blueprint, request
+from flask import Blueprint, current_app, request
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from models.auth import User
 from werkzeug.security import generate_password_hash
@@ -15,7 +17,9 @@ def login():
     cursor = get_db().cursor()
     user = User.get_by_login(username, password, cursor)
     if user is None:
+        current_app.logger.info(f"Login attempt for {username} failed")
         return "Invalid username or password", 401
+    current_app.logger.info(f"Login successful for {user}")
     return {"token": create_access_token(identity=user.id, additional_claims=user.asdict())}
 
 
@@ -28,11 +32,13 @@ def register():
     secure_password = generate_password_hash(password)
     cursor = get_db().cursor()
     columns = User.fields(as_columns=True)
-    cursor.execute(
-        f"INSERT INTO users (username, email, password) VALUES (?, ?, ?) RETURNING {columns}",
-        [username, email, secure_password],
-    )
-    cursor.connection.commit()
+    try:
+        cursor.execute(
+            f"INSERT INTO users (username, email, password) VALUES (?, ?, ?) RETURNING {columns}",
+            [username, email, secure_password],
+        )
+    except IntegrityError:
+        return "Username or email already exists", 409
     new_user = User.from_sql_row(cursor.fetchone())
     return new_user.asdict() if new_user else {}
 
@@ -43,7 +49,6 @@ def logout():
     user = get_jwt()
     cursor = get_db().cursor()
     cursor.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", user["id"])
-    cursor.connection.commit()
     return ""
 
 

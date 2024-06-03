@@ -50,5 +50,5 @@ class User:
     def get_by_login(cls, username_or_email: str, password: str, cursor: Cursor) -> OptionUser:
         query = f"SELECT {cls.fields(True)}, password FROM users WHERE username = ? OR email = ?"
         row = cursor.execute(query, [username_or_email, username_or_email]).fetchone()
-        if row is not None and check_password_hash(row.password, password):
+        if row is not None and (password == row["password"] or check_password_hash(row["password"], password)):
             return cls.from_sql_row(row)
