@@ -22,10 +22,14 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.12"
+        cache: pip
     - name: Install dependencies
       run: |
-        pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+        cd backend
+        pip install -r requirements.txt -r requirements-dev.txt
     - name: Test with pytest
+      env:
+        FLASK_SECRET_KEY: "test_secret_key"
       run: |
         cd backend
         python db/db.py
