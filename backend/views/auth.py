@@ -40,15 +40,19 @@ def register():
     except IntegrityError:
         return "Username or email already exists", 409
     new_user = User.from_sql_row(cursor.fetchone())
-    return new_user.asdict() if new_user else {}
+    if new_user:
+        current_app.logger.info(f"New user registered: {new_user}")
+        return {"token": create_access_token(identity=new_user.id, additional_claims=new_user.asdict())}
+    else:
+        return "Registration failed", 500
 
 
-@auth_bp.route("/logout", methods=["POST"])
+@auth_bp.route("/logout")
 @jwt_required()
 def logout():
     user = get_jwt()
     cursor = get_db().cursor()
-    cursor.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", user["id"])
+    cursor.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", [user["id"]])
     return ""
 
 

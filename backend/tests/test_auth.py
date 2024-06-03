@@ -1,5 +1,6 @@
 import pytest
 from db.db import get_db
+from flask_jwt_extended import decode_token
 from main import app
 from werkzeug.security import generate_password_hash
 
@@ -50,22 +51,45 @@ def test_login(db):
     assert "invalid" in response.text.lower(), "Invalid username not detected"
 
 
-def test_register():
+def test_register(db):
     client = app.test_client()
 
     # Test registration, new user
     response = client.post("/register", json={"username": user1[0], "email": user1[1], "password": user1[2]})
     assert response.status_code == 200, "Registration failed"
     assert isinstance(response.json, dict)
-    assert response.json["username"] == user1[0], "Username mismatch"
-    assert response.json["email"] == user1[1], "Email mismatch"
-    assert response.json["role"] == "user", "Role mismatch"
-    assert "created" in response.json.keys(), "Created timestamp missing"
-    assert "last_login" in response.json.keys(), "Last login timestamp missing"
-    assert "id" in response.json.keys(), "ID missing"
-    assert "password" not in response.json.keys(), "Password returned in response"
+    assert "token" in response.json.keys(), "Token not in response for valid registration"
+    user = decode_token(response.json["token"])
+    assert user["username"] == user1[0], "Username mismatch"
+    assert user["email"] == user1[1], "Email mismatch"
+    assert user["role"] == "user", "Role mismatch"
+    assert "created" in user.keys(), "Created timestamp missing"
+    assert "last_login" in user.keys(), "Last login timestamp missing"
+    assert "id" in user.keys(), "ID missing"
+    assert "password" not in user.keys(), "Password returned in response"
 
     # Test registration, existing user
     response = client.post("/register", json={"username": user1[0], "email": user1[1], "password": user1[2]})
     assert response.status_code == 409, "Duplicate username not detected"
     assert "exists" in response.text.lower(), "Duplicate username not detected"
+
+    # Test registration, existing email
+    response = client.post("/register", json={"username": "test_new", "email": user1[1], "password": user1[2]})
+    assert response.status_code == 409, "Duplicate email not detected"
+    assert "exists" in response.text.lower(), "Duplicate email not detected"
+
+
+def test_logout():
+    client = app.test_client()
+    response = client.post("/register", json={"username": user1[0], "email": user1[1], "password": user1[2]})
+    assert isinstance(response.json, dict)
+    register_token = response.json["token"]
+    response = client.post("/login", json={"username": user1[0], "password": user1[2]})
+    assert isinstance(response.json, dict)
+    login_token = response.json["token"]
+    assert register_token != login_token, "Tokens should not match"
+    response = client.get("/logout", headers={"Authorization": f"Bearer {login_token}"})
+    assert response.status_code == 200, "Logout failed"
+    assert response.text == "", "Logout failed"
+    response = client.get("/logout")
+    assert response.status_code == 401, "Logout succeeded without token"

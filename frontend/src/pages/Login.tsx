@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocalStorage } from "usehooks-ts";
-import { BACKEND_URL } from "../backend";
+import { BACKEND_URL, backendFetch } from "../backend";
 import { User } from "../user";
 import "./RegisterLogin.css";
 
@@ -78,11 +78,11 @@ export default function Login() {
 }
 
 export function Logout() {
-    const [_user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
-    removeUser();
-    fetch(`${BACKEND_URL}/logout`);  // we don't care about the response, so no "await" or "return""
+    const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
     const navigate = useNavigate();
     useEffect(() => {
+        backendFetch("/logout", user?.token);  // we don't care about the response, so no "await" or "return""
+        removeUser();
         navigate("/");
     }, []);
     return null;
