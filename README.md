@@ -63,11 +63,12 @@ npm run test
 
 The backend uses SQLite as the database. The database file is created automatically when the backend server is started. If it didn't, or if you need to reset the database, you can delete the `backend/db/db.sqlite` file and restart the backend server. The database will be recreated.
 
-Alternatively, you can run the following command to create the database file:
+The app will also create the first admin username for you automatically, see the terminal output for the username and password.
 
-```bash
-python db/db.py
-```
+If you would like to set your own values for the first admin user, you can do so by setting the `FLASK_INITIAL_ADMIN_USERNAME`, `FLASK_INITIAL_ADMIN_EMAIL`, and `FLASK_INITIAL_ADMIN_PASSWORD` environment variables. See the [backend/example.env](backend/example.env) file for an example.
+
+> [!WARNING]
+> The initial admin user is created only once, when the database file is created. If you delete the database file, the initial admin user will be created again. It is also highly recommended to change the initial admin password after the first login, even if you set your own password in the environment variables.
 
 ## Running the Project with Docker
 
