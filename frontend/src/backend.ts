@@ -1,5 +1,3 @@
-import { useLocalStorage } from "usehooks-ts";
-import { User } from "./user";
 
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string;
 
@@ -13,12 +11,10 @@ export function tmdbImageUrl(path: string, quality: string = 'original') {
     return `https://image.tmdb.org/t/p/${quality}${path}`;
 }
 
-export async function useBackendFetch(url: string, options?: RequestInit, data?: Record<string, any>): Promise<Response> {
-    const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
-    if (user) {
-        console.debug("Adding Authorization header to request", user);
+export async function backendFetch(url: string, token?: string, options?: RequestInit, data?: Record<string, any>): Promise<Response> {
+    if (token) {
         options = options || {};
-        options.headers = { ...options.headers, 'Authorization': `Bearer ${user.token}` };
+        options.headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
     }
     if (options?.method === 'POST' || options?.method === 'PUT' || options?.method === "PATCH") {
         console.debug("Adding Content-Type header to request", options);
@@ -28,11 +24,7 @@ export async function useBackendFetch(url: string, options?: RequestInit, data?:
         console.debug("Adding query parameters to request", data);
         url += `?${new URLSearchParams(data).toString()}`;
     }
-    console.debug("Fetching", url, options);
+    if (!import.meta.env.PROD) console.debug("Fetching", url, options);
     const response = await fetch(`${BACKEND_URL}${url}`, options);
-    if (response.status === 401) {
-        console.warn("Received 401 from backend, logging out");
-        removeUser();
-    }
     return response;
 }

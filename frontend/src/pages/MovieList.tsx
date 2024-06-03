@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { useBackendFetch } from "../backend";
+import { useLocalStorage } from "usehooks-ts";
+import { backendFetch } from "../backend";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import MovieCard, { MovieCardSkeleton } from "../components/MovieCard";
 import { Movie } from "../types";
+import { User } from "../user";
 import './MovieList.css';
 
 function MovieListError() {
@@ -13,12 +15,22 @@ function MovieListError() {
     </>
 }
 
+async function getMovies(removeUser: () => void): Promise<Movie[] | undefined> {
+    const response = await backendFetch("/movies/top");
+    if (response.status === 401) {
+        removeUser();
+        return;
+    }
+    const data = await response.json();
+    return data.results;
+}
+
 export default function MovieList() {
     const [movies, setMovies] = useState<Movie[]>([]);
-    const fetcher = useBackendFetch("/movies");
+    const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
     useEffect(() => {
-        fetcher.then(response => response.json()).then(data => setMovies(data.results));
-    }, []);
+        getMovies(removeUser).then(data => setMovies(data || []));
+    }, [user]);
 
     const skeletons = Array(8).fill(<MovieCardSkeleton />)
 

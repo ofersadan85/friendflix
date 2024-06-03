@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { tmdbImageUrl, useBackendFetch } from "../backend";
+import { useLocalStorage } from "usehooks-ts";
+import { backendFetch, tmdbImageUrl } from "../backend";
 import { ActorCard, ActorCardSkeleton } from "../components/ActorCard";
 import { FullMovie } from "../types";
+import { User } from "../user";
 import "./MoviePage.css";
 
 export function MoviePageSkeleton() {
@@ -36,16 +38,23 @@ export function MoviePageSkeleton() {
 
 }
 
+async function getMovie(id: number | string, removeUser: () => void): Promise<FullMovie | undefined> {
+    const response = await backendFetch(`/movies/${id}`);
+    if (response.status === 401) {
+        removeUser();
+        return;
+    }
+    return await response.json();
+}
+
 export function MoviePage() {
     const { id } = useParams();
     const movieId = parseInt(id || "");
     const [movie, setMovie] = useState<FullMovie | null>(null);
-    const movieFetcher = useBackendFetch(`/movies/${id}`);
-
+    const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
     useEffect(() => {
-        if (!movieId || isNaN(movieId)) setMovie(null);
-        movieFetcher.then(response => response.json()).then(setMovie);
-    }, [id]);
+        getMovie(movieId, removeUser).then(data => setMovie(data || null));
+    }, [id, user]);
 
     const cast = movie && movie.credits.cast.slice(0, 10);
     const backdrop = movie && tmdbImageUrl(movie.backdrop_path, "w780");
@@ -64,8 +73,7 @@ export function MoviePage() {
         // This function is not async, because we don't care about the response
         // We don't need to wait for the backend to respond before updating the UI
         // If we need to verify that the action was successful, we can do that later
-        // TODO: This is wrong, we use a hook incorrectly here
-        return useBackendFetch("/actions", { method: 'GET' }, { movie_id, action });
+        backendFetch(`/actions`, user?.token, { method: 'POST' }, { movie_id, action });
     }
 
     return (

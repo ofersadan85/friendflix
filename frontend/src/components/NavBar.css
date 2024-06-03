@@ -1,0 +1,40 @@
+.navbar-top {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+}
+
+.navbar-top ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    height: 100%;
+}
+
+.navbar-top ul li {
+    margin: 0;
+    padding: 0;
+}
+
+/* Float left anything before the separator, right everything after */
+.navbar-top .separator {
+    flex: 1;
+}
+
+.navbar-top ul li a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #495057;
+}
+
+.navbar-top ul li a:hover {
+    background-color: #e9ecef;
+}
