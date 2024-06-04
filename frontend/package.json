@@ -1,7 +1,13 @@
 {
-  "name": "frontend",
+  "name": "friendflix-client",
+  "description": "A React frontend `client for the Friendflix app",
+  "author": {
+    "name": "Ofer Sadan",
+    "email": "ofersadan85@gmail.com"
+  },
+  "license": "../LICENSE",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite --open",
