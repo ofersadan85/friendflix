@@ -89,4 +89,4 @@ CD (Continuous Deployment to a production server) is not set up yet. [//]: # (TO
 
 ## License
 
-This project is free and open source, and there is no license attached to it. Feel free to use it in any way you see fit.
+This project is free and open source, see the [LICENSE](LICENSE) file for more information.
