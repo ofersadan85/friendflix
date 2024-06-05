@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useLocalStorage } from "usehooks-ts";
 import { backendFetch, tmdbImageUrl } from "../backend";
 import { ActorCard, ActorCardSkeleton } from "../components/ActorCard";
-import { FullMovie } from "../types";
+import { Movie } from "../types";
 import { User } from "../user";
 import "./MoviePage.css";
 
@@ -38,7 +38,7 @@ export function MoviePageSkeleton() {
 
 }
 
-async function getMovie(id: number | string, removeUser: () => void): Promise<FullMovie | undefined> {
+async function getMovie(id: number | string, removeUser: () => void): Promise<Movie | undefined> {
     const response = await backendFetch(`/movies/${id}`);
     if (response.status === 401) {
         removeUser();
@@ -50,19 +50,15 @@ async function getMovie(id: number | string, removeUser: () => void): Promise<Fu
 export function MoviePage() {
     const { id } = useParams();
     const movieId = parseInt(id || "");
-    const [movie, setMovie] = useState<FullMovie | null>(null);
+    const { state } = useLocation();
+    const [movie, setMovie] = useState<Movie | null>(state);
     const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
-    useEffect(() => {
-        getMovie(movieId, removeUser).then(data => setMovie(data || null));
-    }, [id, user]);
 
-    const cast = movie && movie.credits.cast.slice(0, 10);
-    const backdrop = movie && tmdbImageUrl(movie.backdrop_path, "w780");
-    const poster = movie && tmdbImageUrl(movie.poster_path, "w342") || "";
-
-    if (!movie) {
-        return <MoviePageSkeleton />
-    }
+    if (!movie) return <MoviePageSkeleton />
+    const credits = movie.credits || { cast: [] };
+    const cast = credits.cast.slice(0, 10);
+    const backdrop = tmdbImageUrl(movie.backdrop_path, "w780");
+    const poster = tmdbImageUrl(movie.poster_path, "w342") || "";
 
     const backdropStyle: React.CSSProperties = {
         backgroundImage: `url(${backdrop})`,
@@ -75,6 +71,10 @@ export function MoviePage() {
         // If we need to verify that the action was successful, we can do that later
         backendFetch(`/actions`, user?.token, { method: 'POST' }, { movie_id, action });
     }
+
+    useEffect(() => {
+        getMovie(movieId, removeUser).then(data => setMovie(data || null));
+    }, [id, user]);
 
     return (
         <div className="movie-page" style={backdropStyle}>

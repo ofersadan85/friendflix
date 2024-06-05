@@ -2,6 +2,7 @@ export type Movie = {
     id: number;
     isAdult: boolean;
     poster_path: string;
+    backdrop_path: string;
     original_language: "en" | "hb" | "ru";
     title: string;
     release_date: string;
@@ -9,6 +10,9 @@ export type Movie = {
     overview: string;
     vote_count: number;
     watched: boolean;
+    genre_ids?: number[];
+    genres?: Genre[];
+    credits?: { cast: Actor[] };
 }
 
 export type Genre = {
@@ -21,10 +25,4 @@ export type Actor = {
     name: string
     profile_path: string,
     character: string,
-}
-
-export type FullMovie = Movie & {
-    backdrop_path: string
-    genres: Genre[]
-    credits: { cast: Actor[] }
 }

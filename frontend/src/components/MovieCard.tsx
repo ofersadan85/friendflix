@@ -15,10 +15,11 @@ export function MovieCardSkeleton() {
     )
 }
 
-export default function MovieCard({ id, title, release_date, poster_path, watched }: Movie) {
+export default function MovieCard(movie: Movie) {
+    const { id, title, release_date, poster_path, watched } = movie;
     const poster = tmdbImageUrl(poster_path, "w154");
     return (
-        <Link to={`/movie/${id}`}>
+        <Link to={`/movie/${id}`} state={movie}>
             <div className="movie-card">
                 {watched && <div className="watched-overlay">✅</div>}
                 <img src={poster} alt={title} />
