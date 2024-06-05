@@ -42,3 +42,9 @@ if not DB_PATH.is_file():
                 *********************************************************
                 """
         )
+
+        create_examples = app.config.get("CREATE_EXAMPLES", False)
+        app.logger.info("Creating example data")
+        if create_examples:
+            with app.open_resource(DB_PATH.with_name("examples.sql")) as f:  # type: ignore
+                db.executescript(f.read().decode("utf8"))
