@@ -1,13 +1,12 @@
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useLocalStorage } from "usehooks-ts";
+import { Navigate, useNavigate } from "react-router-dom";
 import { BACKEND_URL, backendFetch } from "../backend";
-import { User } from "../user";
+import { useCurrentUser, User } from "../user";
 import "./RegisterLogin.css";
 
 export default function Login() {
-    const [user, setUser] = useLocalStorage<User | null>("user", null);
+    const [user, setUser] = useCurrentUser();
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
     const [formError, setFormError] = useState<string | null>(null);
@@ -78,12 +77,10 @@ export default function Login() {
 }
 
 export function Logout() {
-    const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
-    const navigate = useNavigate();
+    const [user, _setUser, removeUser] = useCurrentUser();
     useEffect(() => {
         backendFetch("/logout", user?.token);  // we don't care about the response, so no "await" or "return""
         removeUser();
-        navigate("/");
-    }, []);
-    return null;
+    });
+    return <Navigate to="/" />;
 }

@@ -1,6 +1,6 @@
 import tmdb
 from db.db import get_db
-from db.user_actions import add_watched_status_to_movies
+from db.user import add_watched_status_to_movies
 from flask import Blueprint
 from flask_jwt_extended import get_jwt, jwt_required
 

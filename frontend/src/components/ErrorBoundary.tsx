@@ -8,7 +8,7 @@ type ErrorBoundaryProps = {
 export class ErrorBoundary extends Component<ErrorBoundaryProps> {
     state = { hasError: false }
 
-    static getDerivedStateFromError(_error: any) {
+    static getDerivedStateFromError() {
         return { hasError: true }
     }
 

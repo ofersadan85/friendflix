@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
-import { useLocalStorage } from "usehooks-ts";
-import { User } from "../user";
+import { useCurrentUser } from "../user";
 import "./NavBar.css";
 
 function UserNavBar() {
@@ -26,7 +25,7 @@ function GuestNavBar() {
 }
 
 export default function NavBar() {
-    const [user, _setUser, _removeUser] = useLocalStorage<User | null>("user", null);
+    const [user] = useCurrentUser();
     return (
         <nav className="navbar-top">
             <ul>

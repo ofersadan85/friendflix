@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useLocalStorage } from "usehooks-ts";
 import { backendFetch } from "../backend";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import MovieCard, { MovieCardSkeleton } from "../components/MovieCard";
+import { UserActionCounterPanel } from "../components/UserActionCountPanel";
 import { Movie } from "../types";
-import { User } from "../user";
+import { useCurrentUser } from "../user";
 import './MovieList.css';
 
 function MovieListError() {
@@ -27,7 +27,7 @@ async function getMovies(removeUser: () => void): Promise<Movie[] | undefined> {
 
 export default function MovieList() {
     const [movies, setMovies] = useState<Movie[]>([]);
-    const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
+    const [user, _setUser, removeUser] = useCurrentUser();
     useEffect(() => {
         getMovies(removeUser).then(data => setMovies(data || []));
     }, [user]);
@@ -37,6 +37,7 @@ export default function MovieList() {
     return (
         <ErrorBoundary fallback={<MovieListError />}>
             <section className="movie-section">
+                {user && <UserActionCounterPanel userId={user.id} action="watchlist" />}
                 <h2>Most popular movies</h2>
                 <div className="movie-list">
                     {movies.length === 0 ? skeletons : movies.map(movie => <MovieCard key={movie.id} {...movie} />)}
@@ -44,4 +45,4 @@ export default function MovieList() {
             </section>
         </ErrorBoundary>
     )
-};
+}

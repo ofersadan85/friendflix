@@ -4,7 +4,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { backendFetch, tmdbImageUrl } from "../backend";
 import { ActorCard, ActorCardSkeleton } from "../components/ActorCard";
 import { Movie } from "../types";
-import { User } from "../user";
+import { useCurrentUser } from "../user";
 import "./MoviePage.css";
 
 export function MoviePageSkeleton() {
@@ -52,7 +52,13 @@ export function MoviePage() {
     const movieId = parseInt(id || "");
     const { state } = useLocation();
     const [movie, setMovie] = useState<Movie | null>(state);
-    const [user, _setUser, removeUser] = useLocalStorage<User | null>("user", null);
+    const [user, _setUser, removeUser] = useCurrentUser();
+    const [watchlist, setWatchlist] = useLocalStorage<number[]>("watchlist", []);
+
+
+    useEffect(() => {
+        getMovie(movieId, removeUser).then(data => setMovie(data || null));
+    }, [movieId, user]);
 
     if (!movie) return <MoviePageSkeleton />
     const credits = movie.credits || { cast: [] };
@@ -69,12 +75,12 @@ export function MoviePage() {
         // This function is not async, because we don't care about the response
         // We don't need to wait for the backend to respond before updating the UI
         // If we need to verify that the action was successful, we can do that later
-        backendFetch(`/actions`, user?.token, { method: 'POST' }, { movie_id, action });
+        backendFetch(`/actions`, user?.token, { method: 'GET' }, { movie_id, action });
+        if (action === "watchlist") {
+            watchlist.push(movieId);
+            setWatchlist(watchlist);
+        }
     }
-
-    useEffect(() => {
-        getMovie(movieId, removeUser).then(data => setMovie(data || null));
-    }, [id, user]);
 
     return (
         <div className="movie-page" style={backdropStyle}>

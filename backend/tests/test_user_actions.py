@@ -1,7 +1,7 @@
 import sqlite3
 
 from db.db import DB_PATH
-from db.user_actions import do_action
+from db.user import do_action
 
 
 def test_do_action():
