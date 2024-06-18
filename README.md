@@ -42,6 +42,9 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
+> [!NOTE]
+> `requirements.txt` and `requirements-dev.txt` are generated using [poetry](https://python-poetry.org/) which is a more advanced package manager for Python. If you want to use poetry, you can install the dependencies using `poetry install` and run the tests using `poetry run pytest`.
+
 ### Frontend (React / Vite / TypeScript)
 
 From within the [frontend](frontend) directory, run the following commands:

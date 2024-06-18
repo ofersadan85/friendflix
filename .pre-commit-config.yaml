@@ -12,7 +12,6 @@ repos:
       - id: check-merge-conflict
       - id: check-symlinks
       - id: detect-private-key
-      - id: requirements-txt-fixer
       - id: check-yaml
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -38,3 +37,20 @@ repos:
     hooks:
       - id: isort
         args: [--profile=black, --line-length=120]
+
+  # Poetry
+  -   repo: https://github.com/python-poetry/poetry
+      rev: 1.8.3
+      hooks:
+      - id: poetry-check
+        args: [-C, ./backend]
+      - id: poetry-lock
+        args: [-C, ./backend]
+      - id: poetry-install
+        args: [-C, ./backend]
+      - id: poetry-export
+        name: Export requirements.txt
+        args: [-C, ./backend, --without=dev, --format=requirements.txt, --output=backend/requirements.txt]
+      - id: poetry-export
+        name: Export requirements-dev.txt
+        args: [-C, ./backend, --only=dev, --format=requirements.txt, --output=backend/requirements-dev.txt]
