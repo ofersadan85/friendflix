@@ -75,7 +75,37 @@ If you would like to set your own values for the first admin user, you can do so
 
 ## Running the Project with Docker
 
-This part will be updated soon. [//]: # (TODO)
+This project can also be run using Docker.
+This is useful if you don't want to install the dependencies on your machine, or if you want to run the project in a containerized environment.
+
+> [!NOTE]
+> The following commands will build and run the project in ***production mode***.
+
+To run the backend (from the backend directory):
+
+```bash
+docker build -t friendflix-backend .
+docker run -p 8080:8080 friendflix-backend
+```
+
+To run the frontend (from the frontend directory):
+
+```bash
+npm run build
+docker build -t friendflix-frontend .
+docker run -p 8081:80 friendflix-frontend
+```
+
+The backend will be running at [http://localhost:8080](http://localhost:8080) and the frontend will be running at [http://localhost:8081](http://localhost:8081).
+
+If you want to see what each Dockerfile does, you can check the [backend/Dockerfile](backend/Dockerfile) and [frontend/Dockerfile](frontend/Dockerfile) files.
+
+> [!WARNING]
+> There's a lot wrong here! These problems will be fixed soon. Here is a list of the current issues:
+>
+> - [ ] We don't use run containers with environment variables so at the moment, they probably won't work in production as we expect (for example, no CORS settings).
+> - [ ] The frontend image requires `npm run build` to be run before building the image, which is not ideal. We should use "multi-stage builds".
+> - [ ] We don't use `.dockerignore` files, so the Docker context is too big and includes unnecessary (and potentially sensitive) files.
 
 ## VsCode shortcuts
 
