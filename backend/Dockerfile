@@ -19,6 +19,9 @@ ENV FLASK_ENV production
 
 # The default environment variable for the database file path
 ENV DB_PATH /data
+# We create a volume for the database file
+# This way, the database file will persist even if the container is removed
+VOLUME ${DB_PATH}
 
 # Gunicorn config, irrelavant for Flask development server or if you're using a different WSGI server
 ENV GUNICORN_HOST 0.0.0.0
