@@ -4,12 +4,17 @@ This is a demo project for watching and sharing movies and TV episodes with frie
 
 ## Usage
 
-To run the project locally, follow these steps:
+To run the project locally, (with docker desktop installed) follow these steps:
 
 ```bash
 git clone https://github.com/ofersadan85/friendflix
 cd friendflix
+cp example.env .env  # copy the example.env file to .env
+# edit the .env file and set the values for the environment variables as needed
+docker compose up --build --detach
 ```
+
+Follow the other instructions in this README.md file for setting up the project for development or for running the project without Docker.
 
 ### Backend API Server (Flask)
 
@@ -100,12 +105,23 @@ The backend will be running at [http://localhost:8080](http://localhost:8080) an
 
 If you want to see what each Dockerfile does, you can check the [backend/Dockerfile](backend/Dockerfile) and [frontend/Dockerfile](frontend/Dockerfile) files.
 
-> [!WARNING]
-> There's a lot wrong here! These problems will be fixed soon. Here is a list of the current issues:
->
-> - [ ] We don't use run containers with environment variables so at the moment, they probably won't work in production as we expect (for example, no CORS settings).
-> - [ ] The frontend image requires `npm run build` to be run before building the image, which is not ideal. We should use "multi-stage builds".
-> - [ ] We don't use `.dockerignore` files, so the Docker context is too big and includes unnecessary (and potentially sensitive) files.
+## Docker Compose
+
+You can also run the project using Docker Compose. This is useful if you want to run the project in a containerized environment, but you don't want to build and run each container separately.
+
+To run the project using Docker Compose:
+
+1. `git clone` this repository and `cd` into the project directory.
+2. Copy the [example.env](example.env) file to `.env` and set the values for the environment variables as needed.
+3. Run the following command:
+
+```bash
+docker compose up --build --detach
+```
+
+Which will both build and all that is needed in the background. It will also create a new `./data/db.sqlite` file for the database at your local machine, so you can persist the data between container restarts.
+
+Without the `--detach` flag, you will see the logs of the containers in the terminal, and you can stop them by pressing Ctrl+C. With the `--detach` flag (also available as `-d`), the containers will run in the background (which is useful for production environments) and you can stop them using `docker compose down` from the within the project directory.
 
 ## VsCode shortcuts
 

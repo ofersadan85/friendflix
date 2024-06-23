@@ -1,0 +1,25 @@
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      args:
+        - VITE_BACKEND_URL=${BACKEND_URL}:${BACKEND_PORT}
+    ports:
+      - ${FRONTEND_PORT}:80
+    links:
+      - backend
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+    environment:
+      - FLASK_FRONTEND_URL=${FRONTEND_URL}:${FRONTEND_PORT}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+    env_file:
+      - .env
+    ports:
+      - ${BACKEND_PORT}:8080
+    volumes:
+      - ./data:/data
