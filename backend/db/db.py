@@ -1,17 +1,17 @@
+import os
 import sqlite3
 from pathlib import Path
 
 from flask import g
 
 CURRENT_FOLDER = Path(__file__).parent
-DB_PATH = CURRENT_FOLDER / "db.sqlite"
-
+DB_PATH = Path(os.getenv("DB_PATH", CURRENT_FOLDER)) / "db.sqlite"
+print(DB_PATH)
 
 def get_db():
     if "db" not in g:
         g.db = sqlite3.connect(DB_PATH)
         g.db.row_factory = sqlite3.Row
-        g.db.autocommit = True
     return g.db
 
 

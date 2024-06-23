@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Flask app in production mode
 ENV FLASK_DEBUG 0
 ENV FLASK_ENV production
+ENV DB_PATH /data
 
 # Gunicorn config, irrelavant for Flask development server or if you're using a different WSGI server
 ENV GUNICORN_HOST 0.0.0.0

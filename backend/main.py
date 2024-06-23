@@ -1,4 +1,5 @@
 from db.db import DB_PATH, close_db, get_db
+from pathlib import Path
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -24,7 +25,7 @@ if not DB_PATH.is_file():
     app.logger.info("Database not found, creating new one")
     with app.app_context():
         db = get_db()
-        with app.open_resource(DB_PATH.with_name("schema.sql")) as f:  # type: ignore
+        with app.open_resource(Path(__file__).parent / "db/schema.sql") as f:  # type: ignore
             db.executescript(f.read().decode("utf8"))
         initial_admin_username = app.config.get("INITIAL_ADMIN_USERNAME", "admin")
         initial_admin_email = app.config.get("INITIAL_ADMIN_EMAIL", "admin@example.com")
@@ -34,7 +35,7 @@ if not DB_PATH.is_file():
             "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
             [initial_admin_username, initial_admin_email, initial_admin_password, "admin"],
         )
-        app.logger.info(
+        print(
             f"""
                 *********************************************************
                 Created initial admin user `{initial_admin_username}` with password: {initial_admin_password}
@@ -46,5 +47,5 @@ if not DB_PATH.is_file():
         create_examples = app.config.get("CREATE_EXAMPLES", False)
         app.logger.info("Creating example data")
         if create_examples:
-            with app.open_resource(DB_PATH.with_name("examples.sql")) as f:  # type: ignore
+            with app.open_resource(Path(__file__).parent / "db/examples.sql") as f:  # type: ignore
                 db.executescript(f.read().decode("utf8"))
