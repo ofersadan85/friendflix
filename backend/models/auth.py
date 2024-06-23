@@ -4,9 +4,6 @@ from sqlite3 import Cursor, Row
 
 from werkzeug.security import check_password_hash
 
-type OptionUser = "User | None"
-
-
 @dataclass
 class User:
     id: int
@@ -31,7 +28,7 @@ class User:
         return ", ".join(all_fields) if as_columns else all_fields
 
     @classmethod
-    def from_sql_row(cls, row: Row) -> OptionUser:
+    def from_sql_row(cls, row: Row) -> "User | None":
         return cls(**{key: row[key] for key in cls.fields()}) if row else None
 
     def __str__(self) -> str:
@@ -41,13 +38,13 @@ class User:
         return str(self)
 
     @classmethod
-    def get_by_id(cls, id: int, cursor: Cursor) -> OptionUser:
+    def get_by_id(cls, id: int, cursor: Cursor) -> "User | None":
         query = f"SELECT {cls.fields(True)} FROM users WHERE id = ?"
         row = cursor.execute(query, [id]).fetchone()
         return cls.from_sql_row(row)
 
     @classmethod
-    def get_by_login(cls, username_or_email: str, password: str, cursor: Cursor) -> OptionUser:
+    def get_by_login(cls, username_or_email: str, password: str, cursor: Cursor) -> "User | None":
         query = f"SELECT {cls.fields(True)}, password FROM users WHERE username = ? OR email = ?"
         row = cursor.execute(query, [username_or_email, username_or_email]).fetchone()
         if row is not None and (password == row["password"] or check_password_hash(row["password"], password)):
