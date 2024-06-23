@@ -4,6 +4,7 @@ from sqlite3 import Cursor, Row
 
 from werkzeug.security import check_password_hash
 
+
 @dataclass
 class User:
     id: int

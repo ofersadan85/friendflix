@@ -6,7 +6,7 @@ from flask import g
 
 CURRENT_FOLDER = Path(__file__).parent
 DB_PATH = Path(os.getenv("DB_PATH", CURRENT_FOLDER)) / "db.sqlite"
-print(DB_PATH)
+
 
 def get_db():
     if "db" not in g:

@@ -1,5 +1,6 @@
-from db.db import DB_PATH, close_db, get_db
 from pathlib import Path
+
+from db.db import DB_PATH, close_db, get_db
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
