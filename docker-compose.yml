@@ -17,9 +17,18 @@ services:
     environment:
       - FLASK_FRONTEND_URL=${FRONTEND_URL}:${FRONTEND_PORT}
       - TMDB_API_KEY=${TMDB_API_KEY}
+      - DB_PORT=${DB_PORT}
     env_file:
       - .env
     ports:
       - ${BACKEND_PORT}:8080
+
+  postgres:
+    container_name: postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: password
     volumes:
-      - ./data:/data
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - ${DB_PORT}:5432

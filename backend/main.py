@@ -1,11 +1,12 @@
 from pathlib import Path
 
-from db.db import DB_PATH, close_db, get_db
+from db.db import close_db, get_db
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from views import all_blueprints
 from werkzeug.security import gen_salt
+from psycopg2.errors import UndefinedTable
 
 app = Flask(__name__)
 app.config.from_prefixed_env()
@@ -22,20 +23,22 @@ if app.debug:
     for key, value in app.config.items():
         app.logger.debug(f"{key}={value}")
 
-lockfile = Path("db.lockfile")
-if not DB_PATH.is_file() and not lockfile.exists():
-    Path("db.lockfile").touch()
-    app.logger.info("Database not found, creating new one")
-    with app.app_context():
-        db = get_db()
+
+with app.app_context():
+    db = get_db()
+    cursor = db.cursor()
+    try:
+        cursor.execute("SELECT id FROM users")
+    except UndefinedTable:
+        app.logger.info("Database not found, creating new one")
         with app.open_resource(Path(__file__).parent / "db/schema.sql") as f:  # type: ignore
-            db.executescript(f.read().decode("utf8"))
+            cursor.execute(f.read().decode("utf8"))
         initial_admin_username = app.config.get("INITIAL_ADMIN_USERNAME", "admin")
         initial_admin_email = app.config.get("INITIAL_ADMIN_EMAIL", "admin@example.com")
         random_password = gen_salt(16)
         initial_admin_password = app.config.get("INITIAL_ADMIN_PASSWORD", random_password)
-        db.execute(
-            "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)",
+        cursor.execute(
+            "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)",
             [initial_admin_username, initial_admin_email, initial_admin_password, "admin"],
         )
         print(
@@ -51,4 +54,4 @@ if not DB_PATH.is_file() and not lockfile.exists():
         app.logger.info("Creating example data")
         if create_examples:
             with app.open_resource(Path(__file__).parent / "db/examples.sql") as f:  # type: ignore
-                db.executescript(f.read().decode("utf8"))
+                cursor.execute(f.read().decode("utf8"))
