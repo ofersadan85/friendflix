@@ -22,7 +22,9 @@ if app.debug:
     for key, value in app.config.items():
         app.logger.debug(f"{key}={value}")
 
-if not DB_PATH.is_file():
+lockfile = Path("db.lockfile")
+if not DB_PATH.is_file() and not lockfile.exists():
+    Path("db.lockfile").touch()
     app.logger.info("Database not found, creating new one")
     with app.app_context():
         db = get_db()
