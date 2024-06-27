@@ -7,8 +7,6 @@ services:
         - VITE_BACKEND_URL=${BACKEND_URL}:${BACKEND_PORT}
     ports:
       - ${FRONTEND_PORT}:80
-    links:
-      - backend
 
   backend:
     container_name: backend
@@ -16,8 +14,6 @@ services:
       context: ./backend
     environment:
       - FLASK_FRONTEND_URL=${FRONTEND_URL}:${FRONTEND_PORT}
-      - TMDB_API_KEY=${TMDB_API_KEY}
-      - DB_PORT=${DB_PORT}
     env_file:
       - .env
     ports:
@@ -27,8 +23,8 @@ services:
     container_name: postgres
     image: postgres:16-alpine
     environment:
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
     volumes:
       - ./data:/var/lib/postgresql/data
-    ports:
-      - ${DB_PORT}:5432

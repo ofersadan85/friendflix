@@ -1,5 +1,5 @@
 import pytest
-from db.db import get_db
+from db import get_db
 from flask_jwt_extended import decode_token
 from main import app
 from werkzeug.security import generate_password_hash
@@ -9,18 +9,19 @@ user2 = ["test_user2", "test2@another.com", generate_password_hash("test_passwor
 
 
 @pytest.fixture
-def db():
+def cursor():
     with app.app_context():
         db = get_db()
-        db.execute("DELETE FROM users WHERE username LIKE 'test_%'")
-        yield db
-        db.execute("DELETE FROM users WHERE username LIKE 'test_%'")
+        cursor = db.cursor()
+        cursor.execute("DELETE FROM users WHERE username LIKE 'test_%'")
+        yield cursor
+        cursor.execute("DELETE FROM users WHERE username LIKE 'test_%'")
 
 
-def test_login(db):
+def test_login(cursor):
     client = app.test_client()
     for user in [user1, user2]:
-        db.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", user)
+        cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", user)
 
     # Test plain password
     response = client.post("/login", json={"username": user1[0], "password": user1[2]})
@@ -51,7 +52,7 @@ def test_login(db):
     assert "invalid" in response.text.lower(), "Invalid username not detected"
 
 
-def test_register(db):
+def test_register(cursor):
     client = app.test_client()
 
     # Test registration, new user
@@ -59,7 +60,8 @@ def test_register(db):
     assert response.status_code == 200, "Registration failed"
     assert isinstance(response.json, dict)
     assert "token" in response.json.keys(), "Token not in response for valid registration"
-    user = decode_token(response.json["token"])
+    with app.app_context():
+        user = decode_token(response.json["token"])
     assert user["username"] == user1[0], "Username mismatch"
     assert user["email"] == user1[1], "Email mismatch"
     assert user["role"] == "user", "Role mismatch"
@@ -79,7 +81,7 @@ def test_register(db):
     assert "exists" in response.text.lower(), "Duplicate email not detected"
 
 
-def test_logout():
+def test_logout(cursor):
     client = app.test_client()
     response = client.post("/register", json={"username": user1[0], "email": user1[1], "password": user1[2]})
     assert isinstance(response.json, dict)

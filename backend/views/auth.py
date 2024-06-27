@@ -1,9 +1,8 @@
-from sqlite3 import IntegrityError
-
-from db.db import get_db
+from db import get_db
 from flask import Blueprint, current_app, request
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from models.auth import User
+from psycopg2.errors import UniqueViolation
 from werkzeug.security import generate_password_hash
 
 auth_bp = Blueprint("auth", __name__)
@@ -34,10 +33,10 @@ def register():
     columns = User.fields(as_columns=True)
     try:
         cursor.execute(
-            f"INSERT INTO users (username, email, password) VALUES (?, ?, ?) RETURNING {columns}",
+            f"INSERT INTO users (username, email, password) VALUES (%s, %s, %s) RETURNING {columns}",
             [username, email, secure_password],
         )
-    except IntegrityError:
+    except UniqueViolation:
         return "Username or email already exists", 409
     new_user = User.from_sql_row(cursor.fetchone())
     if new_user:
@@ -52,7 +51,7 @@ def register():
 def logout():
     user = get_jwt()
     cursor = get_db().cursor()
-    cursor.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", [user["id"]])
+    cursor.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = %s", [user["id"]])
     return ""
 
 
@@ -60,7 +59,7 @@ def logout():
 def register_check():
     username = request.args.get("username")
     cursor = get_db().cursor()
-    cursor.execute("SELECT id FROM users WHERE username = ?", [username])
+    cursor.execute("SELECT id FROM users WHERE username = %s", [username])
     response_code = 200 if cursor.fetchone() is None else 409
     return "", response_code
 

@@ -1,8 +1,8 @@
-from db.db import get_db
-from db.user import do_action as do_action_db
-from db.user import get_user_movies
+from db import get_db
 from flask import Blueprint, request
 from flask_jwt_extended import get_jwt, jwt_required
+from models.user import do_action as do_action_db
+from models.user import get_user_movies
 
 actions_bp = Blueprint("actions", __name__)
 

@@ -4,6 +4,7 @@
         "AUTOINCREMENT",
         "executescript",
         "friendflix",
+        "psycopg",
         "pytest",
         "tmdb",
         "tvshow",
