@@ -1,17 +1,23 @@
-from dataclasses import asdict, dataclass, fields
 from datetime import datetime
 
-from psycopg2.extras import DictCursor
-from werkzeug.security import check_password_hash
+from psycopg2.extras import RealDictCursor
+from pydantic import BaseModel
 
 
-@dataclass
-class User:
+def check_password_hash(hashed_password: str, password: str) -> bool:
+    return True  # TODO: implement
+
+
+def hash_password(password: str) -> str:
+    return password  # TODO: implement
+
+
+class User(BaseModel):
     id: int
     username: str
     email: str
     created: str | datetime
-    last_login: str | datetime
+    last_login: str | datetime | None
     role: str = "user"
 
     def __post_init__(self):
@@ -20,18 +26,6 @@ class User:
         if isinstance(self.last_login, str):
             self.last_login = datetime.fromisoformat(self.last_login)
 
-    def asdict(self) -> dict:
-        return asdict(self)
-
-    @classmethod
-    def fields(cls, as_columns: bool = False) -> list[str] | str:
-        all_fields = [field.name for field in fields(cls)]
-        return ", ".join(all_fields) if as_columns else all_fields
-
-    @classmethod
-    def from_sql_row(cls, row) -> "User | None":
-        return cls(**{key: row[key] for key in cls.fields()}) if row else None
-
     def __str__(self) -> str:
         return f"<{self.role.capitalize()} {self.username} ({self.id})>"
 
@@ -39,15 +33,20 @@ class User:
         return str(self)
 
     @classmethod
-    def get_by_id(cls, id: int, cursor: DictCursor) -> "User | None":
-        query = f"SELECT {cls.fields(True)} FROM users WHERE id = %s"
+    def sql_fields(cls) -> str:
+        """Returns the class fields as a comma-space separated string as a helper for SQL"""
+        return ", ".join(cls.model_fields.keys())
+
+    @classmethod
+    def get_by_id(cls, id: int, cursor: RealDictCursor) -> "User | None":
+        query = f"SELECT {cls.sql_fields()} FROM users WHERE id = %s"
         cursor.execute(query, [id])
         row = cursor.fetchone()
         return cls.from_sql_row(row)
 
     @classmethod
-    def get_by_login(cls, username_or_email: str, password: str, cursor: DictCursor) -> "User | None":
-        query = f"SELECT {cls.fields(True)}, password FROM users WHERE username = %s OR email = %s"
+    def get_by_login(cls, username_or_email: str, password: str, cursor: RealDictCursor) -> "User | None":
+        query = f"SELECT {cls.sql_fields()}, password FROM users WHERE username = %s OR email = %s"
         cursor.execute(query, [username_or_email, username_or_email])
         row = cursor.fetchone()
         db_password = row["password"] if row else None
@@ -55,3 +54,20 @@ class User:
             return cls.from_sql_row(row)
         else:
             return None
+
+
+class NewUser(BaseModel):
+    username: str
+    password: str
+    email: str
+    role: str = "user"
+
+    def register(self, cursor: RealDictCursor) -> User:
+        hashed_password = hash_password(self.password)
+        query = f"""INSERT INTO users
+                (username, password, email, role)
+                VALUES (%s, %s, %s, %s)
+                RETURNING {User.sql_fields()}"""
+        cursor.execute(query, [self.username, hashed_password, self.email, self.role])
+        row = cursor.fetchone()
+        return User(**row)

@@ -1,72 +1,78 @@
-import os
+import logging
+import random
+import string
 from pathlib import Path
 
 import psycopg2
-from flask import Flask, g
-from psycopg2.extras import DictConnection
-from werkzeug.security import gen_salt
+import psycopg2.errors
+from fastapi import Request
+from psycopg2.extras import RealDictConnection, RealDictCursor
 
-CURRENT_FOLDER = Path(__file__).parent
+from models.auth import NewUser
+from settings import app_settings
 
-
-def get_db():
-    DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_PORT = int(os.getenv("DB_PORT", "5432"))
-    DB_NAME = os.getenv("DB_NAME", "postgres")
-    DB_USER = os.getenv("DB_USER", "postgres")
-    DB_PASS = os.getenv("DB_PASS", "password")
-    if "db" not in g:
-        g.db = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASS,
-            host=DB_HOST,
-            port=DB_PORT,
-            connection_factory=DictConnection,
-        )
-        g.db.autocommit = True
-    return g.db
+logger = logging.getLogger("uvicorn")
 
 
-def close_db(_e=None):
-    db = g.pop("db", None)
-    if db is not None:
-        db.close()
+def load_query(name: str) -> str:
+    if not name.endswith(".sql"):
+        name = name + ".sql"
+    return (Path("db") / name).read_text()
 
 
-def init_db(app: Flask):
-    db = get_db()
+def db_connect() -> RealDictConnection:
+    return psycopg2.connect(dsn=str(app_settings.db_address), connection_factory=RealDictConnection)
+
+
+def get_db(request: Request) -> RealDictCursor:
+    if hasattr(request.app.state, "db"):
+        db = request.app.state.db
+    else:
+        db = db_connect()
+        db.autocommit = True
+        request.app.state.db = db
+    try:
+        cursor = db.cursor()
+    except psycopg2.InterfaceError:
+        delattr(request.app.state, "db")
+        raise
+    return cursor
+
+
+def init_db():
+    db = db_connect()
     cursor = db.cursor()
     try:
         cursor.execute("SELECT id FROM users LIMIT 1")
     except psycopg2.errors.UndefinedTable:
-        app.logger.info("Database not found, creating new one")
+        logger.info("Database not found, creating new one")
+        db.rollback()
     else:
-        app.logger.info("Database already exists, skipping creation")
+        logger.info("Database already exists, skipping creation")
         return
 
-    with app.open_resource("db/schema.sql") as f:
-        cursor.execute(f.read())
-
-    initial_admin_username = app.config.get("INITIAL_ADMIN_USERNAME", "admin")
-    initial_admin_email = app.config.get("INITIAL_ADMIN_EMAIL", "admin@example.com")
-    random_password = gen_salt(16)
-    initial_admin_password = app.config.get("INITIAL_ADMIN_PASSWORD", random_password)
-    cursor.execute(
-        "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)",
-        [initial_admin_username, initial_admin_email, initial_admin_password, "admin"],
+    password = app_settings.initial_admin_password or "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(16)
     )
-    app.logger.info(
+    cursor.execute(load_query("schema"))
+    new_user = NewUser(
+        username=app_settings.initial_admin_username,
+        password=password,
+        email=app_settings.initial_admin_email,
+        role="admin",
+    )
+    new_user.register(cursor)
+    logger.info(
         f"""
             *********************************************************
-            Created initial admin user `{initial_admin_username}` with password: {initial_admin_password}
+            Created initial admin user `{app_settings.initial_admin_username}` with password: {password}
             Don't forget to change the password on your first login!
             *********************************************************
             """
     )
 
-    create_examples = app.config.get("CREATE_EXAMPLES", False)
-    app.logger.info("Creating example data")
-    if create_examples:
-        with app.open_resource("db/examples.sql") as f:
-            cursor.execute(f.read())
+    if app_settings.create_examples:
+        logger.info("Creating example data")
+        examples = Path("db/examples.sql").read_text()
+        cursor.execute(examples)
+    db.commit()
