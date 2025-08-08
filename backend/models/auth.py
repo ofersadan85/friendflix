@@ -1,15 +1,23 @@
 from datetime import datetime
 
-from psycopg2.extras import RealDictCursor
-from pydantic import BaseModel
+import bcrypt
+from psycopg import AsyncConnection
+from psycopg.rows import class_row, namedtuple_row
+from psycopg.sql import SQL
+from pydantic import BaseModel, Field
 
 
 def check_password_hash(hashed_password: str, password: str) -> bool:
-    return True  # TODO: implement
+    return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 
 def hash_password(password: str) -> str:
-    return password  # TODO: implement
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+
+class LoginUser(BaseModel):
+    username_or_email: str = Field(alias="username")
+    password: str
 
 
 class User(BaseModel):
@@ -26,12 +34,6 @@ class User(BaseModel):
         if isinstance(self.last_login, str):
             self.last_login = datetime.fromisoformat(self.last_login)
 
-    def __str__(self) -> str:
-        return f"<{self.role.capitalize()} {self.username} ({self.id})>"
-
-    def __repr__(self) -> str:
-        return str(self)
-
     @classmethod
     def sql_fields(cls) -> str:
         """Returns the class fields as a comma-space separated string as a helper for SQL"""
@@ -42,18 +44,37 @@ class User(BaseModel):
         query = f"SELECT {cls.sql_fields()} FROM users WHERE id = %s"
         cursor.execute(query, [id])
         row = cursor.fetchone()
-        return cls.from_sql_row(row)
+        if row is None:
+            return None
+        return cls(
+            id=row["id"],
+            username=row["username"],
+            email=row["email"],
+            created=row["created"],
+            last_login=row["last_login"],
+            role=row["role"],
+        )
 
     @classmethod
-    def get_by_login(cls, username_or_email: str, password: str, cursor: RealDictCursor) -> "User | None":
-        query = f"SELECT {cls.sql_fields()}, password FROM users WHERE username = %s OR email = %s"
-        cursor.execute(query, [username_or_email, username_or_email])
-        row = cursor.fetchone()
-        db_password = row["password"] if row else None
-        if db_password and (password == db_password or check_password_hash(db_password, password)):
-            return cls.from_sql_row(row)
-        else:
-            return None
+    async def get_by_login(cls, username_or_email: str, password: str, conn: AsyncConnection) -> "User | None":
+        query = SQL(f"SELECT {cls.sql_fields()}, password FROM users WHERE username = %s OR email = %s")  # type: ignore
+        async with conn.cursor(row_factory=namedtuple_row) as cursor:
+            await cursor.execute(query, [username_or_email, username_or_email])
+            row = await cursor.fetchone()
+            if row is None:
+                return None
+            if row.password and (password == row.password or check_password_hash(row.password, password)):
+                now = datetime.now()
+                query = SQL("UPDATE users SET last_login = %s WHERE id = %s")
+                await cursor.execute(query, [now, row["id"]])
+                return cls(
+                    id=row["id"],
+                    username=row["username"],
+                    email=row["email"],
+                    created=row["created"],
+                    last_login=now,
+                    role=row["role"],
+                )
 
 
 class NewUser(BaseModel):
@@ -62,12 +83,14 @@ class NewUser(BaseModel):
     email: str
     role: str = "user"
 
-    def register(self, cursor: RealDictCursor) -> User:
+    async def register(self, conn: AsyncConnection) -> User:
         hashed_password = hash_password(self.password)
-        query = f"""INSERT INTO users
+        query = SQL(f"""INSERT INTO users
                 (username, password, email, role)
                 VALUES (%s, %s, %s, %s)
-                RETURNING {User.sql_fields()}"""
-        cursor.execute(query, [self.username, hashed_password, self.email, self.role])
-        row = cursor.fetchone()
-        return User(**row)
+                RETURNING {User.sql_fields()}""")  # type: ignore
+        async with conn.cursor(row_factory=class_row(User)) as cursor:
+            await cursor.execute(query, [self.username, hashed_password, self.email, self.role])
+            user = await cursor.fetchone()
+            assert user is not None
+            return user

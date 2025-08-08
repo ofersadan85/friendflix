@@ -70,10 +70,10 @@ for router in all_routers:
 async def root(db: RealDictCursor = Depends(get_db)) -> JSONResponse:
     app_datetime = datetime.now().isoformat()
     try:
-        db.execute("SELECT NOW() AS db_datetime")
+        db.execute("SELECT NOW()")
         db_datetime = db.fetchone()
         assert db_datetime is not None
-        db_datetime = db_datetime["db_datetime"]
+        db_datetime = db_datetime["now"]
         content = {"health": "OK", "app_datetime": app_datetime, "db_datetime": db_datetime.isoformat()}
         status_code = 200
     except (psycopg2.Error, AssertionError, KeyError):
