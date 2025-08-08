@@ -2,8 +2,11 @@
     "cSpell.words": [
         "appcontext",
         "AUTOINCREMENT",
+        "checkpw",
         "executescript",
         "friendflix",
+        "gensalt",
+        "hashpw",
         "psycopg",
         "pytest",
         "tmdb",
