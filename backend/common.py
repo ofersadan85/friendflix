@@ -1,6 +1,7 @@
 import logging
 from functools import lru_cache
 from pathlib import Path
+from typing import Any
 
 from fastapi import Request
 from psycopg.sql import SQL, Composed, Identifier
@@ -43,13 +44,13 @@ class SQLModel(BaseModel):
 
 
 @lru_cache
-def load_query(name: str) -> str:
+def load_query(name: str) -> SQL | Composed:
     if not name.endswith(".sql"):
         name = name + ".sql"
-    return (Path("db") / name).read_text()
+    return SQL((Path("db") / name).read_text())  # type: ignore[unused-ignore]
 
 
-async def pool_connect():
+async def pool_connect() -> AsyncConnectionPool[Any]:
     pool = AsyncConnectionPool(
         conninfo=str(app_settings.db_address),  # cSpell: disable-line
         open=False,
@@ -61,8 +62,8 @@ async def pool_connect():
 
 async def get_db(request: Request) -> AsyncConnectionPool:
     if hasattr(request.app.state, "db_pool"):
-        pool = request.app.state.db_pool
+        pool: AsyncConnectionPool = request.app.state.db_pool
     else:
         pool = await pool_connect()
         request.app.state.db_pool = pool
-    return pool  # type: ignore
+    return pool

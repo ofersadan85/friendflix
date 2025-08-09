@@ -1,10 +1,8 @@
 import logging
 import random
 import string
-from pathlib import Path
 
 import psycopg
-from psycopg.sql import SQL
 
 from common import app_settings, load_query, pool_connect
 from routes.auth import NewUser
@@ -12,7 +10,7 @@ from routes.auth import NewUser
 logger = logging.getLogger("uvicorn")
 
 
-async def init_db():
+async def init_db() -> None:
     pool = await pool_connect()
     async with pool.connection() as conn:
         try:
@@ -30,8 +28,7 @@ async def init_db():
             random.choice(string.ascii_letters + string.digits) for _ in range(16)
         )
         async with conn.cursor() as cursor:
-            schema = SQL(load_query("schema"))  # type: ignore
-            await cursor.execute(schema)
+            await cursor.execute(query=load_query("schema"))
             new_user = NewUser(
                 username=app_settings.initial_admin_username,
                 password=password,
@@ -47,5 +44,4 @@ async def init_db():
                     """)
             if app_settings.create_examples:
                 logger.info("Creating example data")
-                examples = SQL(Path("db/examples.sql").read_text())  # type: ignore
-                await cursor.execute(examples)
+                await cursor.execute(query=load_query("examples"))

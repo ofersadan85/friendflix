@@ -35,7 +35,7 @@ class User(SQLModel):
     last_login: str | datetime | None
     role: str = "user"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if isinstance(self.created, str):
             self.created = datetime.fromisoformat(self.created)
         if isinstance(self.last_login, str):
@@ -43,9 +43,11 @@ class User(SQLModel):
 
     @classmethod
     async def get_by_id(cls, id: int, conn: AsyncConnection) -> "User | None":
-        query = SQL("SELECT {fields} FROM users WHERE id = %s").format(fields=cls.sql_fields())
         async with conn.cursor(row_factory=class_row(User)) as cursor:
-            await cursor.execute(query, [id])
+            await cursor.execute(
+                query=SQL("SELECT {fields} FROM users WHERE id = %s").format(fields=cls.sql_fields()),
+                params=[id],
+            )
             user = await cursor.fetchone()
             return user
 
@@ -55,9 +57,11 @@ class LoginUser(BaseModel):
     password: str
 
     async def get_user(self, conn: AsyncConnection) -> User:
-        query = SQL("SELECT id, password FROM users WHERE username = %s OR email = %s")
         async with conn.cursor(row_factory=dict_row) as cursor:
-            await cursor.execute(query, [self.username_or_email, self.username_or_email])
+            await cursor.execute(
+                query=SQL("SELECT id, password FROM users WHERE username = %s OR email = %s"),
+                params=[self.username_or_email, self.username_or_email],
+            )
             row = await cursor.fetchone()
         if row is None:
             raise HTTPException(status_code=401, detail="User not found")
@@ -66,10 +70,12 @@ class LoginUser(BaseModel):
         user_id = row["id"]
         now = datetime.now()
         async with conn.cursor(row_factory=class_row(User)) as cursor:
-            query = SQL("UPDATE users SET last_login = %s WHERE id = %s RETURNING {fields}").format(
-                fields=User.sql_fields()
+            await cursor.execute(
+                query=SQL("UPDATE users SET last_login = %s WHERE id = %s RETURNING {fields}").format(
+                    fields=User.sql_fields()
+                ),
+                params=[now, user_id],
             )
-            await cursor.execute(query, [now, user_id])
             user = await cursor.fetchone()
             assert user is not None, "User should not be None after checking password"
             return user
@@ -83,12 +89,14 @@ class NewUser(BaseModel):
 
     async def register(self, conn: AsyncConnection) -> User:
         hashed_password = hash_password(self.password)
-        query = SQL("""INSERT INTO users (username, password, email, role)
-                VALUES (%s, %s, %s, %s)
-                RETURNING {fields}""").format(fields=User.sql_fields())
         async with conn.cursor(row_factory=class_row(User)) as cursor:
             try:
-                await cursor.execute(query, [self.username, hashed_password, self.email, self.role])
+                await cursor.execute(
+                    query=SQL("""INSERT INTO users (username, password, email, role)
+                VALUES (%s, %s, %s, %s)
+                RETURNING {fields}""").format(fields=User.sql_fields()),
+                    params=[self.username, hashed_password, self.email, self.role],
+                )
             except SQLError as e:
                 # This will catch any sql error but will raise HTTPException
                 # Internally this will still log the error appropriately
