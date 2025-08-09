@@ -1,8 +1,10 @@
+import logging
 from datetime import datetime, timedelta, timezone
+from typing import Annotated
 
 import bcrypt
 import jwt
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from psycopg import AsyncConnection
 from psycopg import Error as SQLError
@@ -14,6 +16,7 @@ from pydantic import BaseModel, Field
 from common import SQLModel, app_settings, get_db
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+logger = logging.getLogger("uvicorn")
 
 
 def check_password_hash(hashed_password: str, password: str) -> bool:
@@ -97,8 +100,63 @@ class NewUser(BaseModel):
             return user
 
 
+async def required_user(request: Request, db: Annotated[AsyncConnectionPool, Depends(get_db)]) -> User:
+    """
+    Get the currently authenticated user from the DB based on the auth token.
+    This function is used as a dependency in routes that *require* authentication.
+    Error 401 if unauthenticated for any reason (session expired, invalid token, etc.)
+    Error 404 if user not found (shouldn't happen unless an authenticated user is deleted)
+    """
+    auth_token = request.cookies.get("auth_token") or request.headers.get("Authorization")
+    if not auth_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    if auth_token.startswith("Bearer "):
+        auth_token = auth_token[len("Bearer ") :]
+    logger.debug(f"Decoding auth token: {auth_token}")
+    try:
+        payload = jwt.decode(auth_token, app_settings.jwt_secret_key, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
+
+    async with db.connection() as conn:
+        user = await User.get_by_id(user_id, conn)
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        logger.debug(f"Current user: {user}")
+        return user
+
+
+def current_user(request: Request) -> User | None:
+    """
+    A thinner version of the required_user dependency.
+    Returns either the current authenticated user or None. Does not raise errors.
+    Does not make a database call, only checks the token contents.
+    If token contents are insufficient, returns None.
+    """
+    auth_token = request.headers.get("Authorization") or request.cookies.get("auth_token")
+    if not auth_token:
+        return None
+    if auth_token.startswith("Bearer "):
+        auth_token = auth_token[len("Bearer ") :]
+    logger.debug(f"Decoding auth token: {auth_token}")
+    try:
+        payload = jwt.decode(auth_token, app_settings.jwt_secret_key, algorithms=["HS256"])
+        user_data = payload.get("user")
+        user = User(**user_data)
+        logger.debug(f"Current user: {user}")
+        return user
+    except Exception:
+        return None
+
+
 @router.post("/register")
-async def register(new_user: NewUser, db: AsyncConnectionPool = Depends(get_db)) -> User:
+async def register(new_user: NewUser, db: Annotated[AsyncConnectionPool, Depends(get_db)]) -> User:
     async with db.connection() as conn:
         return await new_user.register(conn)
 
@@ -106,16 +164,16 @@ async def register(new_user: NewUser, db: AsyncConnectionPool = Depends(get_db))
 def create_auth_token(user: User) -> str:
     now = datetime.now(tz=timezone.utc)
     jwt_payload = {
-        "sub": user.id,
+        "sub": str(user.id),
         "exp": (now + timedelta(minutes=app_settings.jwt_expiry_minutes)).timestamp(),
         "iat": now.timestamp(),
-        "user":user.model_dump(mode="json"),
+        "user": user.model_dump(mode="json"),
     }
     return jwt.encode(jwt_payload, app_settings.jwt_secret_key, algorithm="HS256")
 
 
 @router.post("/login")
-async def login(login_user: LoginUser, db: AsyncConnectionPool = Depends(get_db)) -> JSONResponse:
+async def login(login_user: LoginUser, db: Annotated[AsyncConnectionPool, Depends(get_db)]) -> JSONResponse:
     async with db.connection() as conn:
         user = await login_user.get_user(conn)
     auth_token = create_auth_token(user)
@@ -129,3 +187,13 @@ async def logout() -> JSONResponse:
     response = JSONResponse(content={"message": "Logged out successfully"})
     response.delete_cookie("auth_token")
     return response
+
+
+@router.get("/me")
+async def get_me(user: Annotated[User, Depends(required_user)]) -> User:
+    return user
+
+
+@router.get("/current", include_in_schema=False)
+async def get_current_user(user: Annotated[User, Depends(current_user)]) -> User | None:
+    return user

@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime
+from typing import Annotated
 
 import psycopg
 from fastapi import Depends, FastAPI
@@ -22,6 +23,7 @@ async def lifespan_handler(app: FastAPI):
         app.state.settings = app_settings
         app.debug = app.state.settings.debug
         mode = "DEBUG / DEVELOPMENT" if app.debug else "PRODUCTION"
+        logger.setLevel(logging.DEBUG if app.debug else logging.INFO)
         logger.info(f"Starting app in {mode} mode")
         logger.info(f"CORS: FRONTEND_URL is set to {app.state.settings.frontend_url}")
         await init_db()
@@ -49,7 +51,7 @@ for router in all_routers:
 
 
 @app.get("/healthcheck")
-async def root(db: AsyncConnectionPool = Depends(get_db)) -> JSONResponse:
+async def healthcheck(db: Annotated[AsyncConnectionPool, Depends(get_db)]) -> JSONResponse:
     app_datetime = datetime.now().isoformat()
     try:
         async with db.connection() as conn:
