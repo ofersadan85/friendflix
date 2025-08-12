@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,6 +12,9 @@ from db import init_db
 from routes import all_routers
 
 logger = logging.getLogger("uvicorn")
+
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 @asynccontextmanager

@@ -6,34 +6,55 @@ from typing import Any
 from fastapi import Request
 from psycopg.sql import SQL, Composed, Identifier
 from psycopg_pool import AsyncConnectionPool
-from pydantic import BaseModel, EmailStr, HttpUrl, PostgresDsn, ValidationError
+from pydantic import BaseModel, EmailStr, HttpUrl, PostgresDsn, ValidationError, AnyUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("uvicorn")
+
+
+class InitialAdminUser(BaseModel):
+    username: str = "admin"
+    email: EmailStr = "admin@example.com"
+    password: str | None = None
+
+
+class JWTSettings(BaseModel):
+    secret_key: str
+    expiry_minutes: int = 60
 
 
 class AppSettings(BaseSettings):
     debug: bool = False
     db_address: PostgresDsn
     frontend_url: HttpUrl | None = None
-    initial_admin_username: str = "admin"
-    initial_admin_password: str | None = None
-    initial_admin_email: EmailStr = "admin@example.com"
+    initial_admin: InitialAdminUser = InitialAdminUser()
     create_examples: bool = False
-    jwt_secret_key: str
-    jwt_expiry_minutes: int = 60
+    jwt: JWTSettings
+    smtp: AnyUrl | None = None
 
     model_config = SettingsConfigDict(
         env_prefix="friendflix_",
         env_file=".env",
+        env_nested_delimiter="_",
+        env_nested_max_split=1,
         # cli_parse_args=True, # This is buggy when using fastapi cli
     )
+
+    @field_validator("smtp")
+    @classmethod
+    def validate_smtp(cls, v: AnyUrl | None) -> AnyUrl | None:
+        if v is None:
+            return None
+        if not all([v.username, v.password, v.host, v.port]) or v.scheme != "smtp":
+            logger.warning("SMTP URL must include username, password, host, and port: smtp://user:pass@host:port")
+            logger.warning("SMTP Settings will be ignored")
+        return v
 
 
 try:
     app_settings = AppSettings()  # type: ignore
-except ValidationError:
-    logger.fatal("Some mandatory environment variables are missing or wrong, see example.env")
+except ValidationError as e:
+    logger.fatal(f"Some mandatory environment variables are missing or wrong, see example.env {e}")
     exit(69)
 
 

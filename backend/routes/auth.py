@@ -4,7 +4,7 @@ from typing import Annotated
 
 import bcrypt
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from psycopg import AsyncConnection
 from psycopg import Error as SQLError
@@ -34,6 +34,8 @@ class User(SQLModel):
     created: str | datetime
     last_login: str | datetime | None
     role: str = "user"
+    enabled: bool = True
+    verified: bool = False
 
     def __post_init__(self) -> None:
         if isinstance(self.created, str):
@@ -59,14 +61,16 @@ class LoginUser(BaseModel):
     async def get_user(self, conn: AsyncConnection) -> User:
         async with conn.cursor(row_factory=dict_row) as cursor:
             await cursor.execute(
-                query=SQL("SELECT id, password FROM users WHERE username = %s OR email = %s"),
+                query=SQL("SELECT id, password, enabled FROM users WHERE username = %s OR email = %s"),
                 params=[self.username_or_email, self.username_or_email],
             )
             row = await cursor.fetchone()
         if row is None:
-            raise HTTPException(status_code=401, detail="User not found")
-        if self.password != row["password"] and not check_password_hash(row["password"], self.password):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        if not row["enabled"]:
+            raise HTTPException(status_code=status.HTTP_423_LOCKED, detail="User is disabled")
+        if not check_password_hash(row["password"], self.password):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
         user_id = row["id"]
         now = datetime.now()
         async with conn.cursor(row_factory=class_row(User)) as cursor:
@@ -100,11 +104,14 @@ class NewUser(BaseModel):
             except SQLError as e:
                 # This will catch any sql error but will raise HTTPException
                 # Internally this will still log the error appropriately
-                # But the user will only see status 500 and the detail
-                raise HTTPException(status_code=500, detail="User registration failed") from e
+                # But the user will only see status 409 and the detail
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Username or Email already exists",
+                ) from e
             user = await cursor.fetchone()
-            if user is None:
-                raise HTTPException(status_code=500, detail="User registration failed")
+            assert user is not None, "User should not be None after registration"
+            logger.info(f"User {self.username} registered successfully")
             return user
 
 
@@ -117,27 +124,42 @@ async def required_user(request: Request, db: Annotated[AsyncConnectionPool, Dep
     """
     auth_token = request.cookies.get("auth_token") or request.headers.get("Authorization")
     if not auth_token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
     if auth_token.startswith("Bearer "):
         auth_token = auth_token[len("Bearer ") :]
     logger.debug(f"Decoding auth token: {auth_token}")
     try:
-        payload = jwt.decode(auth_token, app_settings.jwt_secret_key, algorithms=["HS256"])
+        payload = jwt.decode(auth_token, app_settings.jwt.secret_key, algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(status_code=401, detail="Invalid token payload")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
 
     async with db.connection() as conn:
         user = await User.get_by_id(user_id, conn)
         if user is None:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         logger.debug(f"Current user: {user}")
+        if not user.enabled:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is disabled")
         return user
+
+
+async def required_admin(user: Annotated[User, Depends(required_user)]) -> User:
+    """
+    This function is used as a dependency in routes that require admin privileges.
+    Extends the required_user dependency (so it will raise 401 if unauthenticated)
+    Raises error 403 if user is not an admin or 423 email is not verified.
+    """
+    if user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin privileges required")
+    if not user.verified:
+        raise HTTPException(status_code=status.HTTP_423_LOCKED, detail="Admin email must be verified")
+    return user
 
 
 def current_user(request: Request) -> User | None:
@@ -154,30 +176,32 @@ def current_user(request: Request) -> User | None:
         auth_token = auth_token[len("Bearer ") :]
     logger.debug(f"Decoding auth token: {auth_token}")
     try:
-        payload = jwt.decode(auth_token, app_settings.jwt_secret_key, algorithms=["HS256"])
+        payload = jwt.decode(auth_token, app_settings.jwt.secret_key, algorithms=["HS256"])
         user_data = payload.get("user")
         user = User(**user_data)
         logger.debug(f"Current user: {user}")
+        if not user.enabled:
+            return None
         return user
     except Exception:
         return None
-
-
-@router.post("/register")
-async def register(new_user: NewUser, db: Annotated[AsyncConnectionPool, Depends(get_db)]) -> User:
-    async with db.connection() as conn:
-        return await new_user.register(conn)
 
 
 def create_auth_token(user: User) -> str:
     now = datetime.now(tz=timezone.utc)
     jwt_payload = {
         "sub": str(user.id),
-        "exp": (now + timedelta(minutes=app_settings.jwt_expiry_minutes)).timestamp(),
+        "exp": (now + timedelta(minutes=app_settings.jwt.expiry_minutes)).timestamp(),
         "iat": now.timestamp(),
         "user": user.model_dump(mode="json"),
     }
-    return jwt.encode(jwt_payload, app_settings.jwt_secret_key, algorithm="HS256")
+    return jwt.encode(jwt_payload, app_settings.jwt.secret_key, algorithm="HS256")
+
+
+@router.post("/register")
+async def register(new_user: NewUser, db: Annotated[AsyncConnectionPool, Depends(get_db)]) -> User:
+    async with db.connection() as conn:
+        return await new_user.register(conn)
 
 
 @router.post("/login")
@@ -205,3 +229,16 @@ async def get_me(user: Annotated[User, Depends(required_user)]) -> User:
 @router.get("/current", include_in_schema=False)
 async def get_current_user(user: Annotated[User, Depends(current_user)]) -> User | None:
     return user
+
+
+@router.get("/is_username_available")
+async def is_username_available(username: str, db: Annotated[AsyncConnectionPool, Depends(get_db)]) -> bool:
+    async with db.connection() as conn:
+        async with conn.cursor() as cursor:
+            await cursor.execute(
+                query=SQL("SELECT EXISTS(SELECT 1 FROM users WHERE username = %s)"),
+                params=[username],
+            )
+            exists = await cursor.fetchone()
+            assert exists is not None, "Query should return a boolean"
+            return not exists[0]

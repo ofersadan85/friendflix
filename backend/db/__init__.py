@@ -24,24 +24,32 @@ async def init_db() -> None:
             logger.info("Database already exists, skipping creation")
             return
 
-        password = app_settings.initial_admin_password or "".join(
+        password = app_settings.initial_admin.password or "".join(
             random.choice(string.ascii_letters + string.digits) for _ in range(16)
         )
         async with conn.cursor() as cursor:
             await cursor.execute(query=load_query("schema"))
             new_user = NewUser(
-                username=app_settings.initial_admin_username,
+                username=app_settings.initial_admin.username,
                 password=password,
-                email=app_settings.initial_admin_email,
+                email=app_settings.initial_admin.email,
                 role="admin",
             )
             await new_user.register(conn)
             logger.info(f"""
                     *********************************************************
-                    Created initial admin user `{app_settings.initial_admin_username}` with password: {password}
+                    Created initial admin user `{app_settings.initial_admin.username}` with password: {password}
                     Don't forget to change the password on your first login!
                     *********************************************************
                     """)
             if app_settings.create_examples:
                 logger.info("Creating example data")
-                await cursor.execute(query=load_query("examples"))
+                example_users = [
+                    NewUser(username="alice123", password="password123", email="alice@example.com"),
+                    NewUser(username="bob456", password="password456", email="bob@example.com"),
+                    NewUser(username="charlie789", password="password789", email="charlie@example.com", role="admin"),
+                    NewUser(username="diana101", password="password101", email="diana@example.com"),
+                    NewUser(username="eve202", password="password202", email="eve@example.com"),
+                ]
+                for user in example_users:
+                    await user.register(conn)
