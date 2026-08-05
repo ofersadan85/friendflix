@@ -3,7 +3,7 @@ import { backendFetch } from "../backend";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import MovieCard, { MovieCardSkeleton } from "../components/MovieCard";
 import { UserActionCounterPanel } from "../components/UserActionCountPanel";
-import { Movie } from "../types";
+import { type Movie } from "../types";
 import { useCurrentUser } from "../user";
 import './MovieList.css';
 
@@ -30,7 +30,7 @@ export default function MovieList() {
     const [user, _setUser, removeUser] = useCurrentUser();
     useEffect(() => {
         getMovies(removeUser).then(data => setMovies(data || []));
-    }, [user]);
+    }, [user, removeUser]);
 
     const skeletons = Array(8).fill(<MovieCardSkeleton />)
 

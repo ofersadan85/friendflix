@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { BACKEND_URL, backendFetch } from "../backend";
-import { useCurrentUser, User } from "../user";
+import { useCurrentUser, type User } from "../user";
 import "./RegisterLogin.css";
 
 export default function Login() {
