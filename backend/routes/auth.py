@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
 import bcrypt
@@ -178,7 +178,7 @@ def current_user(request: Request) -> User | None:
     try:
         payload = jwt.decode(auth_token, app_settings.jwt.secret_key, algorithms=["HS256"])
         user_data = payload.get("user")
-        user = User(**user_data)
+        user = User.model_validate(user_data)
         logger.debug(f"Current user: {user}")
         if not user.enabled:
             return None
@@ -188,7 +188,7 @@ def current_user(request: Request) -> User | None:
 
 
 def create_auth_token(user: User) -> str:
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     jwt_payload = {
         "sub": str(user.id),
         "exp": (now + timedelta(minutes=app_settings.jwt.expiry_minutes)).timestamp(),

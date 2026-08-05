@@ -14,7 +14,7 @@ from routes import all_routers
 logger = logging.getLogger("uvicorn")
 
 if sys.platform.startswith("win"):
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # ty: ignore[deprecated]
 
 
 @asynccontextmanager

@@ -6,7 +6,7 @@ from typing import Any
 from fastapi import Request
 from psycopg.sql import SQL, Composed, Identifier
 from psycopg_pool import AsyncConnectionPool
-from pydantic import BaseModel, EmailStr, HttpUrl, PostgresDsn, ValidationError, AnyUrl, field_validator
+from pydantic import AnyUrl, BaseModel, EmailStr, HttpUrl, PostgresDsn, ValidationError, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logger = logging.getLogger("uvicorn")
@@ -52,7 +52,7 @@ class AppSettings(BaseSettings):
 
 
 try:
-    app_settings = AppSettings()  # type: ignore
+    app_settings = AppSettings()  # type: ignore[ty:missing-argument]
 except ValidationError as e:
     logger.fatal(f"Some mandatory environment variables are missing or wrong, see example.env {e}")
     exit(69)
@@ -68,7 +68,7 @@ class SQLModel(BaseModel):
 def load_query(name: str) -> SQL | Composed:
     if not name.endswith(".sql"):
         name = name + ".sql"
-    return SQL((Path("db") / name).read_text())  # type: ignore[unused-ignore]
+    return SQL((Path("db") / name).read_text())  # type: ignore[ty:invalid-argument-type]
 
 
 async def pool_connect() -> AsyncConnectionPool[Any]:

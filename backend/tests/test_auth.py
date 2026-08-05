@@ -21,7 +21,7 @@ def client():
         yield client
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 async def db():
     db = await pool_connect()
     yield db

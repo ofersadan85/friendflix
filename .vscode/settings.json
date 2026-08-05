@@ -12,6 +12,7 @@
         "tmdb",
         "tvshow",
         "usehooks",
+        "VITE",
         "watchlist",
         "werkzeug"
     ]

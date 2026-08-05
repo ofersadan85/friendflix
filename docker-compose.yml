@@ -13,7 +13,9 @@ services:
     build:
       context: ./backend
     environment:
-      - FLASK_FRONTEND_URL=${FRONTEND_URL}:${FRONTEND_PORT}
+      # - FRIENDFLIX_DEBUG=true
+      # - FRIENDFLIX_FRONTEND_URL="http://localhost:5000"  # Will default to '*' for CORS if not supplied
+      - FRIENDFLIX_DB_ADDRESS=postgres://${DB_USER:-postgres}:${DB_PASS:-password}@${DB_HOST:-localhost}:${DB_PORT:-5432}/${DB_NAME:-postgres}
     env_file:
       - .env
     ports:
@@ -23,8 +25,10 @@ services:
     container_name: postgres
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME:-postgres}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASS:-password}
+    ports:
+      - ${DB_PORT:-5432}:5432
     volumes:
       - ./data:/var/lib/postgresql/data

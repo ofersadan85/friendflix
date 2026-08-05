@@ -42,7 +42,7 @@ jobs:
         run: bun install
       - name: Lint
         working-directory: frontend
-        run: bun run lint
+        run: bun run lint --format=github
 
   build:
     runs-on: ubuntu-latest
