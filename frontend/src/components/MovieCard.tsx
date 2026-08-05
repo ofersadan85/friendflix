@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { tmdbImageUrl } from "../backend";
-import { Movie } from "../types";
+import { type Movie } from "../types";
 import './MovieCard.css';
 
 export function MovieCardSkeleton() {

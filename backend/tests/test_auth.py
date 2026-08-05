@@ -1,97 +1,90 @@
+import random
+import string
+
 import pytest
-from db import get_db
-from flask_jwt_extended import decode_token
+from fastapi.testclient import TestClient
+from psycopg_pool import AsyncConnectionPool
+
+from common import pool_connect
 from main import app
-from werkzeug.security import generate_password_hash
-
-user1 = ["test_user1", "test@example.com", "test_password"]
-user2 = ["test_user2", "test2@another.com", generate_password_hash("test_password")]
+from routes.auth import NewUser, User
 
 
-@pytest.fixture
-def cursor():
-    with app.app_context():
-        db = get_db()
-        cursor = db.cursor()
-        cursor.execute("DELETE FROM users WHERE username LIKE 'test_%'")
-        yield cursor
-        cursor.execute("DELETE FROM users WHERE username LIKE 'test_%'")
+def random_string(length: int) -> str:
+    letters = string.ascii_letters + string.digits
+    return "".join(random.choice(letters) for _ in range(length))
 
 
-def test_login(cursor):
-    client = app.test_client()
-    for user in [user1, user2]:
-        cursor.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)", user)
-
-    # Test plain password
-    response = client.post("/login", json={"username": user1[0], "password": user1[2]})
-    assert response.status_code == 200, "Valid login failed (plain password)"
-    assert isinstance(response.json, dict)
-    assert "token" in response.json.keys(), "Token not in response for valid login (plain password)"
-
-    # Test hashed password
-    response = client.post("/login", json={"username": user2[0], "password": user2[2]})
-    assert response.status_code == 200, "Valid login failed (hashed password)"
-    assert isinstance(response.json, dict)
-    assert "token" in response.json.keys(), "Token not in response for valid login (hashed password)"
-
-    # Test email login
-    response = client.post("/login", json={"username": user1[1], "password": user1[2]})
-    assert response.status_code == 200, "Valid login failed (email)"
-    assert isinstance(response.json, dict)
-    assert "token" in response.json.keys(), "Token not in response for valid login (email)"
-
-    # Test invalid password
-    response = client.post("/login", json={"username": "test_user1", "password": "wrong_password"})
-    assert response.status_code == 401, "Invalid password not detected"
-    assert "invalid" in response.text.lower(), "Invalid password not detected"
-
-    # Test invalid username
-    response = client.post("/login", json={"username": "wrong_user", "password": "test_password"})
-    assert response.status_code == 401, "Invalid username not detected"
-    assert "invalid" in response.text.lower(), "Invalid username not detected"
+@pytest.fixture(scope="session")
+def client():
+    with TestClient(app) as client:
+        yield client
 
 
-def test_register(cursor):
-    client = app.test_client()
-
-    # Test registration, new user
-    response = client.post("/register", json={"username": user1[0], "email": user1[1], "password": user1[2]})
-    assert response.status_code == 200, "Registration failed"
-    assert isinstance(response.json, dict)
-    assert "token" in response.json.keys(), "Token not in response for valid registration"
-    with app.app_context():
-        user = decode_token(response.json["token"])
-    assert user["username"] == user1[0], "Username mismatch"
-    assert user["email"] == user1[1], "Email mismatch"
-    assert user["role"] == "user", "Role mismatch"
-    assert "created" in user.keys(), "Created timestamp missing"
-    assert "last_login" in user.keys(), "Last login timestamp missing"
-    assert "id" in user.keys(), "ID missing"
-    assert "password" not in user.keys(), "Password returned in response"
-
-    # Test registration, existing user
-    response = client.post("/register", json={"username": user1[0], "email": user1[1], "password": user1[2]})
-    assert response.status_code == 409, "Duplicate username not detected"
-    assert "exists" in response.text.lower(), "Duplicate username not detected"
-
-    # Test registration, existing email
-    response = client.post("/register", json={"username": "test_new", "email": user1[1], "password": user1[2]})
-    assert response.status_code == 409, "Duplicate email not detected"
-    assert "exists" in response.text.lower(), "Duplicate email not detected"
+@pytest.fixture(scope="session")
+async def db():
+    db = await pool_connect()
+    yield db
+    await db.close()
 
 
-def test_logout(cursor):
-    client = app.test_client()
-    response = client.post("/register", json={"username": user1[0], "email": user1[1], "password": user1[2]})
-    assert isinstance(response.json, dict)
-    register_token = response.json["token"]
-    response = client.post("/login", json={"username": user1[0], "password": user1[2]})
-    assert isinstance(response.json, dict)
-    login_token = response.json["token"]
-    assert register_token != login_token, "Tokens should not match"
-    response = client.get("/logout", headers={"Authorization": f"Bearer {login_token}"})
-    assert response.status_code == 200, "Logout failed"
-    assert response.text == "", "Logout failed"
-    response = client.get("/logout")
-    assert response.status_code == 401, "Logout succeeded without token"
+@pytest.mark.asyncio
+async def test_register_login(client: TestClient, db: AsyncConnectionPool):
+    username = "test_" + random_string(8)
+    password = random_string(12)
+    email = f"{username}@example.com"
+    new_user = NewUser(username=username, password=password, email=email)
+
+    # Login before registration
+    response = client.post("/auth/login", json=new_user.model_dump(exclude={"email"}))
+    assert response.status_code == 404
+    assert response.cookies.get("auth_token") is None, "Auth token cookie should not be set"
+
+    # Register the user
+    response = client.post("/auth/register", json=new_user.model_dump())
+    assert response.status_code == 200
+    user = response.json()
+    assert "id" in user
+    assert user["id"] > 0
+    assert "password" not in user, "Password should not be returned"
+    user = User(**user)
+    assert user.username == username
+    assert user.email == email
+    assert user.last_login is None
+    assert user.role == "user"
+    assert user.enabled
+    assert not user.verified
+
+    # Login after registration
+    response = client.post("/auth/login", json=new_user.model_dump(exclude={"email"}))
+    assert response.status_code == 200
+    json_response = response.json()
+    token = json_response.get("auth_token")
+    assert token is not None, "Auth token should be returned"
+    assert response.cookies.get("auth_token") is not None, "Auth token cookie should be set"
+    returned_user = User(**json_response.get("user"))
+    assert returned_user.model_dump(exclude={"last_login"}) == user.model_dump(exclude={"last_login"})
+
+    # Login with wrong password
+    response = client.post("/auth/login", json={"username": username, "password": "wrong"})
+    assert response.status_code == 401
+    assert response.cookies.get("auth_token") is None, "Auth token cookie should not be set"
+
+    # Login with email
+    response = client.post("/auth/login", json={"username": email, "password": password})
+    assert response.status_code == 200
+    json_response = response.json()
+    token = json_response.get("auth_token")
+    assert token is not None, "Auth token should be returned"
+    assert response.cookies.get("auth_token") is not None, "Auth token cookie should be set"
+    returned_user = User(**json_response.get("user"))
+    assert returned_user.model_dump(exclude={"last_login"}) == user.model_dump(exclude={"last_login"})
+
+    # Register with the same username
+    response = client.post("/auth/register", json=new_user.model_dump())
+    assert response.status_code == 409
+    assert response.json().get("detail") == "Username or Email already exists"
+
+    # Cleanup
+    async with db.connection() as conn:
+        await conn.execute("DELETE FROM users WHERE id = %s", (user.id,))

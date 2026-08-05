@@ -1,5 +1,5 @@
 import { tmdbImageUrl } from "../backend";
-import { Actor } from "../types";
+import { type Actor } from "../types";
 import "./ActorCard.css";
 
 export function ActorCardSkeleton() {

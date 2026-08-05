@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "usehooks-ts";
 import { backendFetch } from "../backend";
@@ -13,7 +13,7 @@ export function UserActionCounterPanel({ userId, action }: UserActionCountPanelP
     const [user, _setUser, removeUser] = useCurrentUser();
     const [movieIds, setMovieIds] = useLocalStorage<number[]>(action, []);
     const isViewingSelf = user?.id === userId;
-    const fetchUserActions = async () => {
+    const fetchUserActions = useCallback(async () => {
         if (!user) setMovieIds([]);
         const response = await backendFetch(`/user/${userId}/${action}`, user?.token);
         if (response.status === 401) removeUser();
@@ -21,11 +21,11 @@ export function UserActionCounterPanel({ userId, action }: UserActionCountPanelP
             const data = await response.json();
             if (isViewingSelf) setMovieIds(data);
         }
-    }
+    }, [user, userId, action, isViewingSelf, setMovieIds, removeUser]);
 
     useEffect(() => {
         fetchUserActions();
-    }, [user, action])
+    }, [user, action, fetchUserActions]);
 
     const actionList = action.endsWith("list") ? action : action + " list";
     if (!user) return null;

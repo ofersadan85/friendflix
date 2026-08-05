@@ -1,72 +1,55 @@
-import os
-from pathlib import Path
+import logging
+import random
+import string
 
-import psycopg2
-from flask import Flask, g
-from psycopg2.extras import DictConnection
-from werkzeug.security import gen_salt
+import psycopg
 
-CURRENT_FOLDER = Path(__file__).parent
+from common import app_settings, load_query, pool_connect
+from routes.auth import NewUser
+
+logger = logging.getLogger("uvicorn")
 
 
-def get_db():
-    DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_PORT = int(os.getenv("DB_PORT", "5432"))
-    DB_NAME = os.getenv("DB_NAME", "postgres")
-    DB_USER = os.getenv("DB_USER", "postgres")
-    DB_PASS = os.getenv("DB_PASS", "password")
-    if "db" not in g:
-        g.db = psycopg2.connect(
-            dbname=DB_NAME,
-            user=DB_USER,
-            password=DB_PASS,
-            host=DB_HOST,
-            port=DB_PORT,
-            connection_factory=DictConnection,
+async def init_db() -> None:
+    pool = await pool_connect()
+    async with pool.connection() as conn:
+        try:
+            async with conn.cursor() as cursor:
+                await cursor.execute("SELECT id FROM users LIMIT 1")
+                _ = await cursor.fetchone()
+        except psycopg.Error:
+            logger.info("Database not found, creating new one")
+            await conn.rollback()
+        else:
+            logger.info("Database already exists, skipping creation")
+            return
+
+        password = app_settings.initial_admin.password or "".join(
+            random.choice(string.ascii_letters + string.digits) for _ in range(16)
         )
-        g.db.autocommit = True
-    return g.db
-
-
-def close_db(_e=None):
-    db = g.pop("db", None)
-    if db is not None:
-        db.close()
-
-
-def init_db(app: Flask):
-    db = get_db()
-    cursor = db.cursor()
-    try:
-        cursor.execute("SELECT id FROM users LIMIT 1")
-    except psycopg2.errors.UndefinedTable:
-        app.logger.info("Database not found, creating new one")
-    else:
-        app.logger.info("Database already exists, skipping creation")
-        return
-
-    with app.open_resource("db/schema.sql") as f:
-        cursor.execute(f.read())
-
-    initial_admin_username = app.config.get("INITIAL_ADMIN_USERNAME", "admin")
-    initial_admin_email = app.config.get("INITIAL_ADMIN_EMAIL", "admin@example.com")
-    random_password = gen_salt(16)
-    initial_admin_password = app.config.get("INITIAL_ADMIN_PASSWORD", random_password)
-    cursor.execute(
-        "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)",
-        [initial_admin_username, initial_admin_email, initial_admin_password, "admin"],
-    )
-    app.logger.info(
-        f"""
-            *********************************************************
-            Created initial admin user `{initial_admin_username}` with password: {initial_admin_password}
-            Don't forget to change the password on your first login!
-            *********************************************************
-            """
-    )
-
-    create_examples = app.config.get("CREATE_EXAMPLES", False)
-    app.logger.info("Creating example data")
-    if create_examples:
-        with app.open_resource("db/examples.sql") as f:
-            cursor.execute(f.read())
+        async with conn.cursor() as cursor:
+            await cursor.execute(query=load_query("schema"))
+            new_user = NewUser(
+                username=app_settings.initial_admin.username,
+                password=password,
+                email=app_settings.initial_admin.email,
+                role="admin",
+            )
+            await new_user.register(conn)
+            logger.info(f"""
+                    *********************************************************
+                    Created initial admin user `{app_settings.initial_admin.username}` with password: {password}
+                    Don't forget to change the password on your first login!
+                    *********************************************************
+                    """)
+            if app_settings.create_examples:
+                logger.info("Creating example data")
+                example_users = [
+                    NewUser(username="alice123", password="password123", email="alice@example.com"),
+                    NewUser(username="bob456", password="password456", email="bob@example.com"),
+                    NewUser(username="charlie789", password="password789", email="charlie@example.com", role="admin"),
+                    NewUser(username="diana101", password="password101", email="diana@example.com"),
+                    NewUser(username="eve202", password="password202", email="eve@example.com"),
+                ]
+                for user in example_users:
+                    await user.register(conn)

@@ -1,4 +1,4 @@
-export type Movie = {
+export interface Movie {
     id: number;
     isAdult: boolean;
     poster_path: string;
@@ -15,14 +15,14 @@ export type Movie = {
     credits?: { cast: Actor[] };
 }
 
-export type Genre = {
-    id: number
-    name: string
+export interface Genre {
+    id: number;
+    name: string;
 }
 
-export type Actor = {
-    id: number
-    name: string
-    profile_path: string,
-    character: string,
+export interface Actor {
+    id: number;
+    name: string;
+    profile_path: string;
+    character: string;
 }

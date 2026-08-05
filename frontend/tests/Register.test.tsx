@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from 'vitest';
 import Register from '../src/pages/Register';
@@ -27,8 +26,8 @@ describe(Register, () => {
 
     const getFormErrors = () => document.querySelectorAll(".error");
 
-    const renderAndFillForm = async (username, email, password, password2) => {
-        const {title, usernameInput, emailInput, passwordInput, password2Input, submit } = renderForm()
+    const renderAndFillForm = async (username: string, email: string, password: string, password2: string) => {
+        const { title, usernameInput, emailInput, passwordInput, password2Input, submit } = renderForm()
         const user = userEvent.setup();
         await user.click(usernameInput)
         await user.keyboard(username)

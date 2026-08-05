@@ -1,14 +1,14 @@
 import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
-export type User = {
+export interface User {
     id: number;
     username: string;
     email: string;
     role: "admin" | "user";
     token?: string;
     exp?: number;
-};
+}
 
 export function useCurrentUser() {
     // A more convenient hook to get the current user without the need to call useLocalStorage directly
@@ -19,6 +19,6 @@ export function useCurrentUser() {
             console.debug("User token expired, removing user");
             removeUser();
         }
-    }, [user]);
+    }, [user, expired, removeUser]);
     return [expired ? null : user, setUser, removeUser] as const;
 }

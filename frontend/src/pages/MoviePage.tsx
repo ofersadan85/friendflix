@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { useLocalStorage } from "usehooks-ts";
 import { backendFetch, tmdbImageUrl } from "../backend";
 import { ActorCard, ActorCardSkeleton } from "../components/ActorCard";
-import { Movie } from "../types";
+import { type Movie } from "../types";
 import { useCurrentUser } from "../user";
 import "./MoviePage.css";
 
@@ -58,7 +58,7 @@ export function MoviePage() {
 
     useEffect(() => {
         getMovie(movieId, removeUser).then(data => setMovie(data || null));
-    }, [movieId, user]);
+    }, [movieId, user, removeUser]);
 
     if (!movie) return <MoviePageSkeleton />
     const credits = movie.credits || { cast: [] };

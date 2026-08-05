@@ -1,16 +1,17 @@
 # The first image we use is used only for building our vite-react app.
 # We won't be running the app in this image, so we don't need to expose any ports or volumes.
-FROM node:22.3-alpine3.19 as build
+FROM oven/bun:alpine AS build
 
 # We set the working directory in the container
 WORKDIR /app
 
 # We install the required libraries first to leverage Docker's cache
 COPY package.json /app
-COPY package-lock.json /app
-RUN npm install
+COPY bun.lock /app
+RUN bun install
 
 # After everything is installed, we copy the source code
+# We do this after installing the libraries to leverage Docker's cache
 COPY . .
 
 # This ARG is used to set the VITE_BACKEND_URL environment variable
@@ -19,7 +20,7 @@ ARG VITE_BACKEND_URL=http://www.example.com
 # This command will create a .env.production file with the VITE_BACKEND_URL environment variable
 RUN sh -c echo "VITE_BACKEND_URL=${VITE_BACKEND_URL}" > .env.production
 # This command will build the app (html, css, js, etc.) with the VITE_BACKEND_URL from the .env.production file
-RUN npm run build
+RUN bun run build
 
 
 # The second image is used to serve the built app
