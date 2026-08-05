@@ -1,43 +1,44 @@
 [project]
 name = "friendflix-backend"
 description = "Backend server for friendflix"
-authors = ["Ofer Sadan <ofersadan85@gmail.com>"]
-readme = "../README.md"
-license = "../LICENSE"
-package-mode = false
-version = "0.1.0"
+authors = [{ name = "Ofer Sadan", email = "ofersadan85@gmail.com" }]
+readme.file = "../README.md"
+license.file = "../LICENSE"
+version = "0.2.0"
 requires-python = ">=3.13"
 
 dependencies = [
-    "bcrypt>=4.3.0",
-    "fastapi[standard]>=0.116.1",
-    "psycopg[binary,pool]>=3.2.9",
-    "pydantic-settings>=2.10.1",
-    "pyjwt>=2.10.1",
+    "bcrypt>=5.0.0",
+    "fastapi[standard]>=0.141.1",
+    "psycopg[binary,pool]>=3.3.4",
+    "pydantic-settings>=2.14.1",
+    "pyjwt>=2.13.0",
 ]
 
 [dependency-groups]
 dev = [
-    "mypy>=1.17.1",
-    "pre-commit>=4.2.0",
-    "pytest>=8.4.1",
-    "pytest-asyncio>=1.1.0",
-    "pytest-cov>=6.2.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
     "pytest-watch>=4.2.0",
-    "ruff>=0.12.7",
 ]
 
 [tool.ruff]
 line-length = 120
 
+[tool.ruff.lint]
+select = [
+    "I",
+    "W",
+    "E",
+    "UP",
+    "RUF",
+]
+ignore = []
+
+[tool.ty.environment]
+root = ["../"]
+
 [tool.pytest.ini_options]
 cache_dir = "~/.cache/pytest"
 addopts = "-vv" # --cov --cov-report=html"
-
-[tool.mypy]
-pretty = true
-incremental = true
-python_version = "3.13"
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_unreachable = true
